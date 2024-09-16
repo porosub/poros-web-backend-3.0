@@ -1,0 +1,19 @@
+{
+  "name": "poros-web-backend-3.0",
+  "version": "1.0.0",
+  "description": "API for managing organization members and blog posts for the POROS homepage website.",
+  "main": "app.js",
+  "scripts": {
+    "test": "nodemon app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/porosub/poros-web-backend-3.0.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/porosub/poros-web-backend-3.0/issues"
+  },
+  "homepage": "https://github.com/porosub/poros-web-backend-3.0#readme"
+}
