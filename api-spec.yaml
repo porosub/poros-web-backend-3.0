@@ -1,0 +1,359 @@
+openapi: 3.0.3
+info:
+  title: POROS Web Home 3.0
+  description: API for managing organization members and blog posts for the POROS homepage website.
+  version: 1.0.0
+
+servers:
+  - url: https://api.porosfilkom.ub.ac.id/v1
+    description: Main API Server
+
+components:
+  securitySchemes:
+    JWT:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Admin:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        password:
+          type: string
+          format: password
+        role:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - username
+        - password
+        - role
+
+    Member:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        position:
+          type: string
+        division:
+          type: string
+        imageURL:
+          type: string
+          format: uri
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - name
+        - position
+        - division
+
+    Blog:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        category:
+          type: string
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - title
+        - category
+        - content
+
+  responses:
+    NotFound:
+      description: Resource not found
+    Unauthorized:
+      description: Unauthorized access
+    BadRequest:
+      description: Bad request
+
+security:
+  - JWT: []
+
+tags:
+  - name: Authentication
+    description: Endpoints for admin authentication
+  - name: Members
+    description: Endpoints for managing members
+  - name: Blogs
+    description: Endpoints for managing blog posts
+
+paths:
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Register a new admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Admin"
+      responses:
+        201:
+          description: Admin registered successfully
+        400:
+          $ref: "#/components/responses/BadRequest"
+
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Login as an admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+                  format: password
+              required:
+                - username
+                - password
+      responses:
+        200:
+          description: Admin logged in successfully, returns a JWT token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        400:
+          $ref: "#/components/responses/BadRequest"
+
+  /members:
+    get:
+      tags:
+        - Members
+      summary: Retrieve a list of members
+      responses:
+        200:
+          description: A list of members
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Member"
+    post:
+      tags:
+        - Members
+      summary: Create a new member
+      security:
+        - JWT: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Member"
+      responses:
+        201:
+          description: Member created successfully
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+
+  /members/{id}:
+    get:
+      tags:
+        - Members
+      summary: Retrieve a single member by ID
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: The ID of the member
+      responses:
+        200:
+          description: A single member
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Member"
+        404:
+          $ref: "#/components/responses/NotFound"
+    put:
+      tags:
+        - Members
+      summary: Update a member by ID
+      security:
+        - JWT: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: The ID of the member
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Member"
+      responses:
+        200:
+          description: Member updated successfully
+        400:
+          $ref: "#/components/responses/BadRequest"
+        404:
+          $ref: "#/components/responses/NotFound"
+    delete:
+      tags:
+        - Members
+      summary: Delete a member by ID
+      security:
+        - JWT: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: The ID of the member
+      responses:
+        204:
+          description: Member deleted successfully
+        404:
+          $ref: "#/components/responses/NotFound"
+
+  /blogs:
+    get:
+      tags:
+        - Blogs
+      summary: Retrieve a list of blog posts
+      responses:
+        200:
+          description: A list of blog posts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Blog"
+    post:
+      tags:
+        - Blogs
+      summary: Create a new blog post
+      security:
+        - JWT: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Blog"
+      responses:
+        201:
+          description: Blog post created successfully
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+
+  /blogs/{id}:
+    get:
+      tags:
+        - Blogs
+      summary: Retrieve a single blog post by ID
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: The ID of the blog post
+      responses:
+        200:
+          description: A single blog post
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Blog"
+        404:
+          $ref: "#/components/responses/NotFound"
+    put:
+      tags:
+        - Blogs
+      summary: Update a blog post by ID
+      security:
+        - JWT: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: The ID of the blog post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Blog"
+      responses:
+        200:
+          description: Blog post updated successfully
+        400:
+          $ref: "#/components/responses/BadRequest"
+        404:
+          $ref: "#/components/responses/NotFound"
+    delete:
+      tags:
+        - Blogs
+      summary: Delete a blog post by ID
+      security:
+        - JWT: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: The ID of the blog post
+      responses:
+        204:
+          description: Blog post deleted successfully
+        404:
+          $ref: "#/components/responses/NotFound"
