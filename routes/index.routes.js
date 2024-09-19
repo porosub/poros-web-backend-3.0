@@ -5,8 +5,8 @@ import { authRouter } from "./auth.routes.js";
 
 const indexRouter = Router();
 
+indexRouter.use("/auth", authRouter);
 indexRouter.use("/blogs", blogRouter);
 indexRouter.use("/members", memberRouter);
-indexRouter.use("/auth", authRouter);
 
 export default indexRouter;
