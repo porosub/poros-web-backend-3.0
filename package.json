@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "API for managing organization members and blog posts for the POROS homepage website.",
   "main": "app.js",
+  "type": "module",
   "scripts": {
     "dev": "nodemon app.js"
   },
