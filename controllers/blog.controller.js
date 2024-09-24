@@ -1,6 +1,8 @@
 import Blog from "../models/blog.model.js";
 
-export const getAllBlogs = (req, res) => {};
+export const getAllBlogs = (req, res) => {
+    //fdihf
+};
 
 export const createBlog = (req, res) => {};
 
