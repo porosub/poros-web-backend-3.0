@@ -18,8 +18,36 @@ The `poros-web-backend-3.0` project is a backend service designed to support the
 
 ## Run Locally 🏠
 
-Will be finished next
+To run this project locally, follow these steps:
 
-```bash
-  ?
-```
+1. Clone the repository:
+
+  ```bash
+  git clone https://github.com/porosub/poros-web-backend-3.0.git
+  ```
+
+2. Navigate to the project directory:
+
+  ```bash
+  cd poros-web-backend-3.0
+  ```
+
+3. Rename the `.env.example` file to `.env` and update the necessary environment variables:
+
+  ```bash
+  mv .env.example .env
+  ```
+  Open .env in your favorite editor and update the values as needed
+
+4. Install the dependencies:
+
+  ```bash
+  npm install
+  ```
+
+5. Run the application:
+
+  ```bash
+  npm run dev
+  ```
+
