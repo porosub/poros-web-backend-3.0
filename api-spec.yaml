@@ -50,6 +50,8 @@ components:
           type: string
         division:
           type: string
+        group:
+          type: string
         imageURL:
           type: string
           format: uri
@@ -63,6 +65,7 @@ components:
         - name
         - position
         - division
+        - group
 
     Blog:
       type: object
