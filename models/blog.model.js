@@ -33,7 +33,7 @@ const Blog = sequelize.define(
     },
   },
   {
-    tableName: "members",
+    tableName: "blogs",
     timestamps: true,
   }
 );
