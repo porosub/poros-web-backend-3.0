@@ -1,6 +1,5 @@
 import Member from "../models/member.model.js";
 
-// Retrieve all members
 export const getAllMembers = async (req, res) => {
   try {
     const members = await Member.findAll();
@@ -10,7 +9,6 @@ export const getAllMembers = async (req, res) => {
   }
 };
 
-// Create a new member
 export const createMember = async (req, res) => {
   const { name, position, division, imageURL } = req.body;
 
@@ -27,7 +25,6 @@ export const createMember = async (req, res) => {
   }
 };
 
-// Retrieve member by ID
 export const getMemberById = async (req, res) => {
   const { id } = req.params;
 
@@ -43,7 +40,6 @@ export const getMemberById = async (req, res) => {
   }
 };
 
-// Update member by ID
 export const updateMemberById = async (req, res) => {
   const { id } = req.params;
   const { name, position, division, imageURL } = req.body;
@@ -65,7 +61,6 @@ export const updateMemberById = async (req, res) => {
   }
 };
 
-// Delete member by ID
 export const deleteMemberById = async (req, res) => {
   const { id } = req.params;
 
