@@ -1,9 +1,12 @@
+import Joi from "joi";
 import BlogPost from "../models/blogpost.model.js";
 
 export const getAllBlogPosts = async (req, res) => {
   try {
     const blogPosts = await BlogPost.findAll();
-    return res.status(200).json(blogPosts);
+    return res
+      .status(200)
+      .json({ message: "Fetch all BlogPost successfully", data: blogPosts });
   } catch (error) {
     console.error("Error fetching blog posts:", error);
     return res.status(500).json({ message: error.message });
@@ -12,14 +15,16 @@ export const getAllBlogPosts = async (req, res) => {
 
 export const createBlogPost = async (req, res) => {
   try {
-    const { title, category, content } = req.body;
-    const newBlogPost = await BlogPost.create({
-      title,
-      category,
-      content,
-    });
+    const { isValid, error } = validateBlogPost(req.body);
+    if (!isValid) {
+      return res.status(400).json({ message: error });
+    }
 
-    return res.status(201).json(newBlogPost);
+    const newBlogPost = await BlogPost.create(req.body);
+    return res.status(201).json({
+      message: "Created post successfully",
+      data: newBlogPost,
+    });
   } catch (error) {
     console.error("Error creating blog post:", error);
     return res.status(500).json({ message: error.message });
@@ -29,8 +34,9 @@ export const createBlogPost = async (req, res) => {
 export const getBlogPostById = async (req, res) => {
   try {
     const blogPost = await BlogPost.findByPk(req.params.id);
-
-    return res.status(200).json(blogPost);
+    return res
+      .status(200)
+      .json({ message: "Fetch all BlogPost successfully", data: blogPosts });
   } catch (error) {
     console.error("Error fetching blog post:", error);
     return res.status(500).json({ message: error.message });
@@ -40,7 +46,6 @@ export const getBlogPostById = async (req, res) => {
 export const updateBlogPostById = async (req, res) => {
   try {
     const { id } = req.params;
-
     const blogPost = await BlogPost.findByPk(id);
 
     if (!blogPost) {
@@ -48,8 +53,10 @@ export const updateBlogPostById = async (req, res) => {
     }
 
     await blogPost.update(req.body);
-
-    return res.status(200).json(blogPost);
+    return res.status(200).json({
+      message: "Updated post successfully",
+      data: blogPost,
+    });
   } catch (error) {
     console.error("Error updating blog post:", error);
     return res.status(500).json({ message: error.message });
@@ -59,7 +66,6 @@ export const updateBlogPostById = async (req, res) => {
 export const deleteBlogPostById = async (req, res) => {
   try {
     const { id } = req.params;
-
     const blogPost = await BlogPost.findByPk(id);
 
     if (!blogPost) {
@@ -67,10 +73,30 @@ export const deleteBlogPostById = async (req, res) => {
     }
 
     await blogPost.destroy();
-
     return res.status(200).json({ message: "BlogPost deleted successfully" });
   } catch (error) {
     console.error("Error deleting blog post:", error);
     return res.status(500).json({ message: error.message });
+  }
+};
+
+const validateBlogPost = (blogPostInput) => {
+  const blogPostValidationSchema = Joi.object({
+    title: Joi.string().required(),
+    category: Joi.string().required(),
+    content: Joi.string().required(),
+  });
+
+  const { error } = blogPostValidationSchema.validate(blogPostInput, {
+    abortEarly: false,
+  });
+
+  if (error) {
+    return {
+      isValid: false,
+      error: error.details.map((detail) => detail.message).join(", "),
+    };
+  } else {
+    return { isValid: true, error: null };
   }
 };
