@@ -52,10 +52,20 @@ export const updateBlogPostById = async (req, res) => {
       return res.status(404).json({ message: "BlogPost not found" });
     }
 
-    await blogPost.update(req.body);
+    const { isValid, error } = validateBlogPost(req.body);
+    if (!isValid) {
+      return res.status(400).json({ message: error });
+    }
+
+    const updatedBlogPost = await BlogPost.update(req.body, {
+      where: {
+        id: id,
+      },
+    });
+
     return res.status(200).json({
       message: "Updated post successfully",
-      data: blogPost,
+      data: updatedBlogPost,
     });
   } catch (error) {
     console.error("Error updating blog post:", error);
