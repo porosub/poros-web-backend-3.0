@@ -13,10 +13,8 @@ export const getAllBlogs = async (req, res) => {
 
 export const createBlog = async (req, res) => {
   try {
-    const { id, title, category, content } = req.body;
-
+    const { title, category, content } = req.body;
     const newBlog = await Blog.create({
-      id: id || undefined,
       title,
       category,
       content,
