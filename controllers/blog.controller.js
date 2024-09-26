@@ -3,7 +3,6 @@ import Blog from "../models/blog.model.js";
 export const getAllBlogs = async (req, res) => {
   try {
     const blogs = await Blog.findAll();
-
     return res.status(200).json(blogs);
   } catch (error) {
     console.error("Error fetching blogs:", error);
