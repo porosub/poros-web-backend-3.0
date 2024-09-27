@@ -67,7 +67,7 @@ components:
         - division
         - group
 
-    Blog:
+    BlogPost:
       type: object
       properties:
         id:
@@ -105,7 +105,7 @@ tags:
     description: Endpoints for admin authentication
   - name: Members
     description: Endpoints for managing members
-  - name: Blogs
+  - name: BlogPosts
     description: Endpoints for managing blog posts
 
 paths:
@@ -261,10 +261,10 @@ paths:
         404:
           $ref: "#/components/responses/NotFound"
 
-  /blogs:
+  /blogposts:
     get:
       tags:
-        - Blogs
+        - BlogPosts
       summary: Retrieve a list of blog posts
       responses:
         200:
@@ -274,10 +274,10 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Blog"
+                  $ref: "#/components/schemas/BlogPost"
     post:
       tags:
-        - Blogs
+        - BlogPosts
       summary: Create a new blog post
       security:
         - JWT: []
@@ -286,7 +286,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Blog"
+              $ref: "#/components/schemas/BlogPost"
       responses:
         201:
           description: Blog post created successfully
@@ -295,10 +295,10 @@ paths:
         401:
           $ref: "#/components/responses/Unauthorized"
 
-  /blogs/{id}:
+  /blogposts/{id}:
     get:
       tags:
-        - Blogs
+        - BlogPosts
       summary: Retrieve a single blog post by ID
       parameters:
         - in: path
@@ -313,12 +313,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Blog"
+                $ref: "#/components/schemas/BlogPost"
         404:
           $ref: "#/components/responses/NotFound"
     put:
       tags:
-        - Blogs
+        - BlogPosts
       summary: Update a blog post by ID
       security:
         - JWT: []
@@ -334,7 +334,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Blog"
+              $ref: "#/components/schemas/BlogPost"
       responses:
         200:
           description: Blog post updated successfully
@@ -344,7 +344,7 @@ paths:
           $ref: "#/components/responses/NotFound"
     delete:
       tags:
-        - Blogs
+        - BlogPosts
       summary: Delete a blog post by ID
       security:
         - JWT: []
