@@ -1,8 +1,8 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../config/database.js";
 
-const Blog = sequelize.define(
-  "Blog",
+const BlogPost = sequelize.define(
+  "BlogPost",
   {
     id: {
       type: DataTypes.INTEGER,
@@ -33,15 +33,15 @@ const Blog = sequelize.define(
     },
   },
   {
-    tableName: "blogs",
+    tableName: "blogposts",
     timestamps: true,
   }
 );
 
-Blog.sync()
+BlogPost.sync()
   .then(() => {})
   .catch((error) => {
-    console.error("Failed to sync Blog model:", error);
+    console.error("Failed to sync BlogPost model:", error);
   });
 
-export default Blog;
+export default BlogPost;

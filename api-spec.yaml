@@ -67,7 +67,7 @@ components:
         - division
         - group
 
-    Blog:
+    BlogPost:
       type: object
       properties:
         id:
@@ -88,10 +88,30 @@ components:
         - title
         - category
         - content
+    BlogPostWithoutContent:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        category:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - title
+        - category
 
   responses:
-    NotFound:
-      description: Resource not found
+    MemberNotFound:
+      description: Member not found
+    BlogPostNotFound:
+      description: Blog spot not found
     Unauthorized:
       description: Unauthorized access
     BadRequest:
@@ -105,7 +125,7 @@ tags:
     description: Endpoints for admin authentication
   - name: Members
     description: Endpoints for managing members
-  - name: Blogs
+  - name: BlogPosts
     description: Endpoints for managing blog posts
 
 paths:
@@ -215,7 +235,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Member"
         404:
-          $ref: "#/components/responses/NotFound"
+          $ref: "#/components/responses/MemberNotFound"
     put:
       tags:
         - Members
@@ -241,7 +261,7 @@ paths:
         400:
           $ref: "#/components/responses/BadRequest"
         404:
-          $ref: "#/components/responses/NotFound"
+          $ref: "#/components/responses/MemberNotFound"
     delete:
       tags:
         - Members
@@ -259,12 +279,12 @@ paths:
         204:
           description: Member deleted successfully
         404:
-          $ref: "#/components/responses/NotFound"
+          $ref: "#/components/responses/MemberNotFound"
 
-  /blogs:
+  /blogposts:
     get:
       tags:
-        - Blogs
+        - BlogPosts
       summary: Retrieve a list of blog posts
       responses:
         200:
@@ -274,10 +294,10 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Blog"
+                  $ref: "#/components/schemas/BlogPostWithoutContent"
     post:
       tags:
-        - Blogs
+        - BlogPosts
       summary: Create a new blog post
       security:
         - JWT: []
@@ -286,7 +306,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Blog"
+              $ref: "#/components/schemas/BlogPost"
       responses:
         201:
           description: Blog post created successfully
@@ -295,10 +315,10 @@ paths:
         401:
           $ref: "#/components/responses/Unauthorized"
 
-  /blogs/{id}:
+  /blogposts/{id}:
     get:
       tags:
-        - Blogs
+        - BlogPosts
       summary: Retrieve a single blog post by ID
       parameters:
         - in: path
@@ -313,12 +333,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Blog"
+                $ref: "#/components/schemas/BlogPost"
         404:
-          $ref: "#/components/responses/NotFound"
+          $ref: "#/components/responses/BlogPostNotFound"
     put:
       tags:
-        - Blogs
+        - BlogPosts
       summary: Update a blog post by ID
       security:
         - JWT: []
@@ -334,17 +354,17 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Blog"
+              $ref: "#/components/schemas/BlogPost"
       responses:
         200:
           description: Blog post updated successfully
         400:
           $ref: "#/components/responses/BadRequest"
         404:
-          $ref: "#/components/responses/NotFound"
+          $ref: "#/components/responses/BlogPostNotFound"
     delete:
       tags:
-        - Blogs
+        - BlogPosts
       summary: Delete a blog post by ID
       security:
         - JWT: []
@@ -359,4 +379,4 @@ paths:
         204:
           description: Blog post deleted successfully
         404:
-          $ref: "#/components/responses/NotFound"
+          $ref: "#/components/responses/BlogPostNotFound"
