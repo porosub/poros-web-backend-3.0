@@ -90,6 +90,8 @@ export const deleteBlogPostById = async (req, res) => {
   }
 };
 
+// tes
+
 const validateBlogPost = (blogPostInput) => {
   const blogPostValidationSchema = Joi.object({
     title: Joi.string().required(),
