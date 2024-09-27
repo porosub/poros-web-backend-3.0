@@ -33,7 +33,7 @@ const BlogPost = sequelize.define(
     },
   },
   {
-    tableName: "blogposts",
+    tableName: "blogspots",
     timestamps: true,
   }
 );
