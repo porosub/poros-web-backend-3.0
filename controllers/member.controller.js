@@ -26,18 +26,22 @@ export const createMember = async (req, res) => {
 };
 
 export const getMemberById = async (req, res) => {
-  const { id } = req.params;
 
-  try {
-    const member = await Member.findByPk(id);
-    if (member) {
-      res.status(200).json(member);
-    } else {
-      res.status(404).json({ error: "Member not found." });
+    try {
+        const result = await Member.findOne({
+            where:{
+                id: req.params.id
+            }
+        })
+
+        return res
+            .status(200)
+            .json(result);
+
+    } catch (error) {
+        console.error(error);
     }
-  } catch (error) {
-    res.status(500).json({ error: "Failed to retrieve member." });
-  }
+
 };
 
 export const updateMemberById = async (req, res) => {
