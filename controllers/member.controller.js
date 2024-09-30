@@ -4,7 +4,24 @@ export const getAllMembers = (req, res) => {};
 
 export const createMember = (req, res) => {};
 
-export const getMemberById = (req, res) => {};
+export const getMemberById = async (req, res) => {
+
+    try {
+        const result = await Member.findOne({
+            where:{
+                id: req.params.id
+            }
+        })
+
+        return res
+            .status(200)
+            .json(result);
+
+    } catch (error) {
+        console.error(error);
+    }
+
+};
 
 export const updateMemberById = (req, res) => {};
 
