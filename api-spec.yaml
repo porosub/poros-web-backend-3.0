@@ -226,7 +226,27 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Member"
+              type: object
+              properties:
+                id:
+                  type: integer
+                name:
+                  type: string
+                position:
+                  type: string
+                division:
+                  type: string
+                group:
+                  type: string
+                image:
+                  type: string
+                  format: base64
+              required:
+                - name
+                - position
+                - division
+                - group
+                
       responses:
         201:
           description: Member created successfully
