@@ -1,6 +1,6 @@
 import passport from "passport";
 import { Strategy as JwtStrategy, ExtractJwt } from "passport-jwt";
-import Admin from "../models/admin.model.js";
+import Admin from "./models/Admin";
 
 passport.use(
   new JwtStrategy(
@@ -8,8 +8,8 @@ passport.use(
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       secretOrKey: process.env.AUTH_SECRET,
     },
-    (jwt_payload, done) => {
-      Admin.findByPk(jwt_payload.sub)
+    (jwtPayload, done) => {
+      Admin.findByPk(jwtPayload.id)
         .then((admin) => {
           if (admin) {
             return done(null, admin);
