@@ -1,7 +1,6 @@
 import "dotenv/config";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import passport from "../config/passport.js";
 import Admin from "../models/admin.model.js";
 
 export const signup = async (req, res) => {
