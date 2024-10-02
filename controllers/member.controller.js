@@ -6,10 +6,10 @@ export const createMember = (req, res) => {};
 
 export const getMemberByName = async (req, res) => {
     try {
-        const {Name} = req.params;
+        const {name} = req.params;
         const result = await Member.findOne({
             where : {
-                name : Name,
+                name : name,
             }
         })
 
@@ -25,14 +25,8 @@ export const getMemberByName = async (req, res) => {
 }
 
 export const getMemberById = async (req, res) => {
-
     try {
-        const result = await Member.findOne({
-            where:{
-                id: req.params.id
-            }
-        })
-
+        const result = await Member.findByPk(req.params.id)
         return res
             .status(200)
             .json(result);
@@ -40,7 +34,6 @@ export const getMemberById = async (req, res) => {
     } catch (error) {
         console.error(error);
     }
-
 };
 
 export const updateMemberById = (req, res) => {};
