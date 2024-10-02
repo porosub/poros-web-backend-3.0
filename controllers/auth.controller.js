@@ -50,5 +50,28 @@ export const signup = async (req, res) => {
 };
 
 export const signin = (req, res) => {
-  
+  const { username, password } = req.body;
+  Admin.findOne({ where: { username } })
+    .then((admin) => {
+      if (!admin) {
+        return res.status(400).json({ message: "Wrong Username or Password" });
+      }
+
+      bcrypt.compare(password, admin.password, (err, isMatch) => {
+        if (err) {
+          return res.status(500).json({ message: "Internal server error" });
+        }
+        if (!isMatch) {
+          return res
+            .status(400)
+            .json({ message: "Wrong Username or Password" });
+        }
+
+        const token = jwt.sign({ id: admin.id }, process.env.AUTH_SECRET_KEY, {
+          expiresIn: "1h",
+        });
+        res.json({ token });
+      });
+    })
+    .catch((err) => res.status(500).json({ message: "Internal server error" }));
 };
