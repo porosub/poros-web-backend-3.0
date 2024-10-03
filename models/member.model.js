@@ -21,6 +21,10 @@ const Member = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    group: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
     imageURL: {
       type: DataTypes.STRING,
       validate: {
