@@ -1,7 +1,6 @@
 import Joi from "joi";
 import BlogPost from "../models/blogpost.model.js";
 
-//Pagination sudah ditambahkan
 export const getAllBlogPosts = async (req, res) => {
   const page = parseInt(req.query.page, 10) || 1;
   const limit = parseInt(req.query.limit, 10) || 10;
