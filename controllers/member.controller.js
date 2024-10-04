@@ -9,8 +9,41 @@ export const getAllMembers = async (req, res) => {
   }
 };
 
+
 export const createMember = async (req, res) => {
-  const { name, position, division, imageURL } = req.body;
+  const { name, position, division, group } = req.body;
+
+  try {
+    let imageURL = null;
+
+    if (req.file) {
+      imageURL = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+    }
+
+    const newMember = await Member.create({
+      name,
+      position,
+      division,
+      group,
+      imageURL,
+    });
+
+    console.log('New member created:', newMember.toJSON());
+
+    res.status(201).json({
+      message: "Member created successfully",
+      member: newMember,
+    });
+  } catch (error) {
+    console.error('Error creating member:', error);
+    if (error.name === 'SequelizeValidationError') {
+      res.status(400).json({ error: "Validation error", details: error.errors });
+    } else {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  }
+};
+
 
   try {
     const newMember = await Member.create({
@@ -23,7 +56,7 @@ export const createMember = async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-};
+
 
 export const getMemberById = async (req, res) => {
   const { id } = req.params;
