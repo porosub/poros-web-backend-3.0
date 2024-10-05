@@ -2,8 +2,8 @@ import Joi from "joi";
 import BlogPost from "../models/blogpost.model.js";
 
 export const getAllBlogPosts = async (req, res) => {
-  const page = parseInt(req.query.page, 10) || 1;
-  const limit = parseInt(req.query.limit, 10) || 10;
+  const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+  const limit = Math.max(1, parseInt(req.query.limit, 10) || 10);
   const offset = (page - 1) * limit;
 
   try {
