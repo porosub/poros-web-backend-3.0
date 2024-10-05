@@ -1,9 +1,56 @@
 import fs from "fs";
 import path from "path";
 import "dotenv/config";
+import { Op } from "@sequelize/core";
 import Member from "../models/member.model.js";
 
-export const getAllMembers = (req, res) => {};
+export const getAllMembers = async (req, res) => {
+  const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+  const limit = Math.max(1, parseInt(req.query.limit, 10) || 10);
+  const offset = (page - 1) * limit;
+
+  const categorization = req.query.categorization;
+
+  try {
+    if (!categorization || page !== 1) {
+      const { count, rows: members } = await Member.findAndCountAll({
+        order: ["name"],
+        offset,
+        limit,
+      });
+
+      return res.status(200).json({
+        members: members,
+        totalItems: count,
+        totalPages: Math.ceil(count / limit),
+        currentPage: page,
+      });
+    }
+
+    const [bpiMembers, bphMembers, noGroupMembers] = await Promise.all([
+      Member.findAll({ where: { group: "bpi" } }),
+      Member.findAll({ where: { group: "bph" } }),
+      Member.findAndCountAll({
+        where: { group: { [Op.is]: null } },
+        order: [["division"], ["name"]],
+        offset,
+        limit,
+      }),
+    ]);
+
+    return res.status(200).json({
+      bpi: bpiMembers,
+      bph: bphMembers,
+      members: noGroupMembers.rows,
+      totalItems: noGroupMembers.count,
+      totalPages: Math.ceil(noGroupMembers.count / limit),
+      currentPage: page,
+    });
+  } catch (error) {
+    console.error("Error fetching members:", error);
+    return res.status(500).json({ message: error.message });
+  }
+};
 
 export const createMember = (req, res) => {};
 
