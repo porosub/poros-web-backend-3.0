@@ -8,9 +8,7 @@ app.use(express.json());
 
 app.use("/", indexRouter);
 
-app.get("/", (req, res) => {
-  res.send("Hello World!");
-});
+app.use("/images", express.static(process.env.IMAGE_STORAGE_LOCATION));
 
 // Start the server
 app.listen(process.env.APP_PORT, () => {
