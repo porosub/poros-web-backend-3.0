@@ -70,7 +70,20 @@ export const getMemberById = async (req, res) => {
 
 export const updateMemberById = (req, res) => {};
 
-export const deleteMemberById = (req, res) => {};
+export const deleteMemberById = async (req, res) => {
+  try {
+    const member = await Member.findByPk(req.params.id);
+    if (!member) {
+      return res.status(404).json({ message: "Member not found" });
+    }
+
+    await member.destroy();
+    return res.status(204);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: error.message });
+  }
+};
 
 const processImage = (requestBody) => {
   if (!requestBody.image.startsWith("data:image/")) {
