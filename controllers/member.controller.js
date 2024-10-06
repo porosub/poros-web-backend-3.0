@@ -56,15 +56,15 @@ export const createMember = (req, res) => {};
 
 export const getMemberById = async (req, res) => {
   try {
-    const result = await Member.findOne({
-      where: {
-        id: req.params.id,
-      },
-    });
+    const member = await Member.findByPk(req.params.id);
+    if (!member) {
+      return res.status(404).json({ message: "Member not found" });
+    }
 
-    return res.status(200).json(result);
+    return res.status(200).json(member);
   } catch (error) {
     console.error(error);
+    return res.status(500).json({ message: error.message });
   }
 };
 
@@ -85,13 +85,18 @@ const processImage = (requestBody) => {
     webp: "webp",
   };
 
-  const mimeType = requestBody.image.match(
+  const mimeTypeMatch = requestBody.image.match(
     /data:image\/([a-zA-Z]+);base64,/
-  )[1];
+  );
+  if (!mimeTypeMatch) {
+    return { isSuccessful: false, error: "Invalid image format" };
+  }
 
+  const mimeType = mimeTypeMatch[1];
   const extension = mimeExtensionMap[mimeType];
 
-  const buffer = Buffer.from(requestBody.image, "base64");
+  const base64Data = requestBody.image.split(",")[1];
+  const buffer = Buffer.from(base64Data, "base64");
 
   if (!fs.existsSync(process.env.IMAGE_STORAGE_LOCATION)) {
     fs.mkdirSync(process.env.IMAGE_STORAGE_LOCATION);
@@ -102,23 +107,30 @@ const processImage = (requestBody) => {
     .map((word) => word[0].toLowerCase())
     .join("");
 
-  let divAcronym;
   const divisionMap = {
-    "Back end": "be",
-    "Front end": "fe",
+    "Back-end": "be",
+    "Front-end": "fe",
   };
 
-  divAcronym = divisionMap[requestBody.division] || "sec";
+  const divAcronym = divisionMap[requestBody.division] || "sec";
 
   const filePath = path.join(
     process.env.IMAGE_STORAGE_LOCATION,
     `${nameAcronym}-${divAcronym}.${extension}`
   );
 
-  fs.writeFileSync(filePath, buffer, (err) => {
-    if (err) {
-      return { isSuccessful: false, error: "Error saving image", detail: err };
+  try {
+    if (fs.existsSync(filePath)) {
+      const existingBuffer = fs.readFileSync(filePath);
+
+      if (buffer.equals(existingBuffer)) {
+        return { isSuccessful: false, error: "Same file, skipped" };
+      }
     }
+    fs.writeFileSync(filePath, buffer);
+
     return { isSuccessful: true, imageURL: filePath };
-  });
+  } catch (err) {
+    return { isSuccessful: false, error: "Error saving image", detail: err };
+  }
 };
