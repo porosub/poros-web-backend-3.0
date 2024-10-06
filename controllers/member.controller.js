@@ -83,6 +83,11 @@ export const deleteMemberById = async (req, res) => {
       return res.status(404).json({ message: "Member not found" });
     }
 
+    const { isSuccessful, error } = deleteImage(member.imageURL);
+    if (!isSuccessful) {
+      return res.status(500).json({ message: error });
+    }
+
     await member.destroy();
     return res.status(204);
   } catch (error) {
@@ -151,5 +156,22 @@ const processImage = (requestBody) => {
     return { isSuccessful: true, imageURL: filePath };
   } catch (err) {
     return { isSuccessful: false, error: "Error saving image", detail: err };
+  }
+};
+
+const deleteImage = (filePath) => {
+  if (fs.existsSync(filePath)) {
+    try {
+      fs.unlinkSync(filePath);
+      return { isSuccessful: true };
+    } catch (err) {
+      return {
+        isSuccessful: false,
+        error: "Error deleting image",
+        detail: err,
+      };
+    }
+  } else {
+    return { isSuccessful: false, error: "File not found" };
   }
 };
