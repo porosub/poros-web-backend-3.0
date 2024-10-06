@@ -58,7 +58,29 @@ export const getAllMembers = async (req, res) => {
   }
 };
 
-export const createMember = (req, res) => {};
+export const createMember = async (req, res) => {
+  try {
+    const { name, position, division, group, image } = req.body;
+
+    const { isSuccessful, imageURL, error } = processImage(req.body);
+    if (!isSuccessful && error !== "File already exist") {
+      return res.status(400).json({ message: error });
+    }
+
+    const newMember = await Member.create({
+      name,
+      position,
+      division,
+      group,
+      imageURL,
+    });
+
+    return res.status(201).json(newMember);
+  } catch (error) {
+    console.error("Error creating member:", error);
+    return res.status(500).json({ message: error.message });
+  }
+};
 
 export const getMemberById = async (req, res) => {
   try {
@@ -148,7 +170,7 @@ const processImage = (requestBody) => {
       const existingBuffer = fs.readFileSync(filePath);
 
       if (buffer.equals(existingBuffer)) {
-        return { isSuccessful: false, error: "Same file, skipped" };
+        return { isSuccessful: false, error: "File already exist" };
       }
     }
     fs.writeFileSync(filePath, buffer);
