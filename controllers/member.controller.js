@@ -13,7 +13,13 @@ export const getAllMembers = async (req, res) => {
 
   try {
     if (!categorization || page !== 1) {
+      const name = req.query.name;
       const { count, rows: members } = await Member.findAndCountAll({
+        where: {
+          name: {
+            [Op.iLike]: `%${name}%`,
+          },
+        },
         order: ["name"],
         offset,
         limit,
