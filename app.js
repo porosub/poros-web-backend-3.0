@@ -8,9 +8,6 @@ app.use(express.json());
 
 app.use("/", indexRouter);
 
-app.get("/", (req, res) => {
-  res.send("Hello World!");
-});
 
 // Start the server
 app.listen(process.env.APP_PORT, () => {

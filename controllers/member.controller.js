@@ -13,7 +13,13 @@ export const getAllMembers = async (req, res) => {
 
   try {
     if (!categorization || page !== 1) {
+      const name = req.query.name;
       const { count, rows: members } = await Member.findAndCountAll({
+        where: {
+          name: {
+            [Op.iLike]: `%${name}%`,
+          },
+        },
         order: ["name"],
         offset,
         limit,
@@ -52,25 +58,65 @@ export const getAllMembers = async (req, res) => {
   }
 };
 
-export const createMember = (req, res) => {};
+export const createMember = async (req, res) => {
+  try {
+    const { name, position, division, group, image } = req.body;
+
+    const { isSuccessful, imageURL, error } = processImage(req.body);
+    if (!isSuccessful && error !== "File already exist") {
+      return res.status(400).json({ message: error });
+    }
+
+    const newMember = await Member.create({
+      name,
+      position,
+      division,
+      group,
+      imageURL,
+    });
+
+    return res.status(201).json(newMember);
+  } catch (error) {
+    console.error("Error creating member:", error);
+    return res.status(500).json({ message: error.message });
+  }
+};
 
 export const getMemberById = async (req, res) => {
   try {
-    const result = await Member.findOne({
-      where: {
-        id: req.params.id,
-      },
-    });
+    const member = await Member.findByPk(req.params.id);
+    if (!member) {
+      return res.status(404).json({ message: "Member not found" });
+    }
 
-    return res.status(200).json(result);
+    return res.status(200).json(member);
   } catch (error) {
     console.error(error);
+    return res.status(500).json({ message: error.message });
   }
 };
 
 export const updateMemberById = (req, res) => {};
 
-export const deleteMemberById = (req, res) => {};
+export const deleteMemberById = async (req, res) => {
+  try {
+    const member = await Member.findByPk(req.params.id);
+    if (!member) {
+      return res.status(404).json({ message: "Member not found" });
+    }
+
+    const { isSuccessful, error } = deleteImage(member.imageURL);
+    if (!isSuccessful) {
+      return res.status(500).json({ message: error });
+    }
+
+    await member.destroy();
+    return res.status(204);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: error.message });
+  }
+};
 
 const processImage = (requestBody) => {
   if (!requestBody.image.startsWith("data:image/")) {
@@ -85,13 +131,18 @@ const processImage = (requestBody) => {
     webp: "webp",
   };
 
-  const mimeType = requestBody.image.match(
+  const mimeTypeMatch = requestBody.image.match(
     /data:image\/([a-zA-Z]+);base64,/
-  )[1];
+  );
+  if (!mimeTypeMatch) {
+    return { isSuccessful: false, error: "Invalid image format" };
+  }
 
+  const mimeType = mimeTypeMatch[1];
   const extension = mimeExtensionMap[mimeType];
 
-  const buffer = Buffer.from(requestBody.image, "base64");
+  const base64Data = requestBody.image.split(",")[1];
+  const buffer = Buffer.from(base64Data, "base64");
 
   if (!fs.existsSync(process.env.IMAGE_STORAGE_LOCATION)) {
     fs.mkdirSync(process.env.IMAGE_STORAGE_LOCATION);
@@ -102,23 +153,47 @@ const processImage = (requestBody) => {
     .map((word) => word[0].toLowerCase())
     .join("");
 
-  let divAcronym;
   const divisionMap = {
-    "Back end": "be",
-    "Front end": "fe",
+    "Back-end": "be",
+    "Front-end": "fe",
   };
 
-  divAcronym = divisionMap[requestBody.division] || "sec";
+  const divAcronym = divisionMap[requestBody.division] || "sec";
 
   const filePath = path.join(
     process.env.IMAGE_STORAGE_LOCATION,
     `${nameAcronym}-${divAcronym}.${extension}`
   );
 
-  fs.writeFileSync(filePath, buffer, (err) => {
-    if (err) {
-      return { isSuccessful: false, error: "Error saving image", detail: err };
+  try {
+    if (fs.existsSync(filePath)) {
+      const existingBuffer = fs.readFileSync(filePath);
+
+      if (buffer.equals(existingBuffer)) {
+        return { isSuccessful: false, error: "File already exist" };
+      }
     }
+    fs.writeFileSync(filePath, buffer);
+
     return { isSuccessful: true, imageURL: filePath };
-  });
+  } catch (err) {
+    return { isSuccessful: false, error: "Error saving image", detail: err };
+  }
+};
+
+const deleteImage = (filePath) => {
+  if (fs.existsSync(filePath)) {
+    try {
+      fs.unlinkSync(filePath);
+      return { isSuccessful: true };
+    } catch (err) {
+      return {
+        isSuccessful: false,
+        error: "Error deleting image",
+        detail: err,
+      };
+    }
+  } else {
+    return { isSuccessful: false, error: "File not found" };
+  }
 };
