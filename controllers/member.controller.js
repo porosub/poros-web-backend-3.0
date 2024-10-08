@@ -15,13 +15,10 @@ export const getAllMembers = async (req, res) => {
   try {
     if (!categorization || page !== 1) {
       const name = req.query.name;
+      const whereClause = name ? { name: { [Op.iLike]: `%${name}%` } } : {};
       const { count, rows: members } = await Member.findAndCountAll({
-        where: {
-          name: {
-            [Op.iLike]: `%${name}%`,
-          },
-        },
-        order: ["name"],
+        where: whereClause,
+        order: ["division", "name"],
         offset,
         limit,
       });
@@ -38,7 +35,7 @@ export const getAllMembers = async (req, res) => {
       Member.findAll({ where: { group: "bpi" } }),
       Member.findAll({ where: { group: "bph" } }),
       Member.findAndCountAll({
-        where: { group: { [Op.is]: "-" } },
+        where: { group: { [Op.eq]: "-" } },
         order: [["division"], ["name"]],
         offset,
         limit,
@@ -127,7 +124,7 @@ export const updateMemberById = async (req, res) => {
     member.position = req.body.position;
     member.division = req.body.division;
     member.group = req.body.group;
-    if (!error) {
+    if (!imageError) {
       member.imageFileName = imageFileName;
     }
 
@@ -152,7 +149,7 @@ export const deleteMemberById = async (req, res) => {
     }
 
     await member.destroy();
-    return res.status(204);
+    return res.status(204).end();
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: error.message });
@@ -232,9 +229,9 @@ const processImage = (requestBody) => {
 
   try {
     if (fs.existsSync(filePath)) {
-      const existingFileName = path.basename(filePath);
+      const existingBuffer = fs.readFileSync(filePath);
 
-      if (fileName === existingFileName) {
+      if (buffer.equals(existingBuffer)) {
         return {
           isSuccessful: true,
           imageFileName: fileName,
@@ -252,7 +249,8 @@ const processImage = (requestBody) => {
   }
 };
 
-const deleteImage = (filePath) => {
+const deleteImage = (fileName) => {
+  const filePath = path.join(process.env.IMAGE_STORAGE_LOCATION, fileName);
   if (fs.existsSync(filePath)) {
     try {
       fs.unlinkSync(filePath);
