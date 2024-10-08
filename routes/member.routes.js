@@ -1,4 +1,5 @@
 import { Router } from "express";
+import jwtAuthMiddleware from "../middlewares/jwt-auth.middleware.js";
 import {
   getAllMembers,
   createMember,
@@ -10,9 +11,9 @@ import {
 const memberRouter = Router();
 
 memberRouter.get("/", getAllMembers);
-memberRouter.post("/", createMember);
-memberRouter.get("/:id", getMemberById);
-memberRouter.put("/:id", updateMemberById);
-memberRouter.delete("/:id", deleteMemberById);
+memberRouter.post("/", jwtAuthMiddleware, createMember);
+memberRouter.get("/:id", jwtAuthMiddleware, getMemberById);
+memberRouter.put("/:id", jwtAuthMiddleware, updateMemberById);
+memberRouter.delete("/:id", jwtAuthMiddleware, deleteMemberById);
 
 export default memberRouter;
