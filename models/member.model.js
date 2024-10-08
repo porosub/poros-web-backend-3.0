@@ -25,7 +25,7 @@ const Member = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    imageURL: {
+    imageFileName: {
       type: DataTypes.STRING,
     },
     createdAt: {
