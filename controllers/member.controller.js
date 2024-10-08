@@ -70,7 +70,7 @@ export const createMember = async (req, res) => {
 
     const {
       isSuccessful,
-      imageURL,
+      imageFileName,
       error: imageError,
     } = processImage(req.body);
     if (!isSuccessful && imageError !== "File already exist") {
@@ -82,7 +82,7 @@ export const createMember = async (req, res) => {
       position,
       division,
       group,
-      imageURL,
+      imageFileName,
     });
 
     return res.status(201).json(newMember);
@@ -118,7 +118,7 @@ export const updateMemberById = async (req, res) => {
       return res.status(400).json({ message: error });
     }
 
-    const { isSuccessful, imageURL, imageError } = processImage(req.body);
+    const { isSuccessful, imageFileName, imageError } = processImage(req.body);
     if (!isSuccessful && error !== "File already exist") {
       return res.status(400).json({ message: error });
     }
@@ -128,7 +128,7 @@ export const updateMemberById = async (req, res) => {
     member.division = req.body.division;
     member.group = req.body.group;
     if (!error) {
-      member.imageURL = imageURL;
+      member.imageFileName = imageFileName;
     }
 
     await member.save();
@@ -146,7 +146,7 @@ export const deleteMemberById = async (req, res) => {
       return res.status(404).json({ message: "Member not found" });
     }
 
-    const { isSuccessful, error } = deleteImage(member.imageURL);
+    const { isSuccessful, error } = deleteImage(member.imageFileName);
     if (!isSuccessful) {
       return res.status(500).json({ message: error });
     }
@@ -237,7 +237,7 @@ const processImage = (requestBody) => {
       if (fileName === existingFileName) {
         return {
           isSuccessful: true,
-          imageURL: fileName,
+          imageFileName: fileName,
         };
       }
     }
@@ -245,7 +245,7 @@ const processImage = (requestBody) => {
 
     return {
       isSuccessful: true,
-      imageURL: fileName,
+      imageFileName: fileName,
     };
   } catch (err) {
     return { isSuccessful: false, error: "Error saving image", detail: err };
