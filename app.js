@@ -11,5 +11,5 @@ app.use("/", indexRouter);
 
 // Start the server
 app.listen(process.env.APP_PORT, () => {
-  console.log(`Server is running on http://localhost:${process.env.APP_PORT}`);
+  console.log(`Server is running on ${process.env.BASE_URL}:${process.env.APP_PORT}`);
 });
