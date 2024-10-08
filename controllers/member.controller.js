@@ -214,6 +214,7 @@ const processImage = (requestBody) => {
   }
 
   const nameAcronym = requestBody.name
+    .trim()
     .split(" ")
     .map((word) => word[0].toLowerCase())
     .join("");
