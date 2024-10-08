@@ -1,12 +1,12 @@
 import passport from "passport";
 import { Strategy as JwtStrategy, ExtractJwt } from "passport-jwt";
-import Admin from "./models/Admin";
+import Admin from "../models/admin.model.js";
 
 passport.use(
   new JwtStrategy(
     {
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: process.env.AUTH_SECRET,
+      secretOrKey: process.env.AUTH_SECRET_KEY,
     },
     (jwtPayload, done) => {
       Admin.findByPk(jwtPayload.id)
