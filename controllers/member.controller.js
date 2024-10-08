@@ -61,16 +61,20 @@ export const getAllMembers = async (req, res) => {
 
 export const createMember = async (req, res) => {
   try {
-    const { isValid, error } = validateMember(req.body);
+    const { isValid, error: validationError } = validateMember(req.body);
     if (!isValid) {
-      return res.status(400).json({ message: error });
+      return res.status(400).json({ message: validationError });
     }
 
     const { name, position, division, group, image } = req.body;
 
-    const { isSuccessful, imageURL, error } = processImage(req.body);
-    if (!isSuccessful && error !== "File already exist") {
-      return res.status(400).json({ message: error });
+    const {
+      isSuccessful,
+      imageURL,
+      error: imageError,
+    } = processImage(req.body);
+    if (!isSuccessful && imageError !== "File already exist") {
+      return res.status(400).json({ message: imageError });
     }
 
     const newMember = await Member.create({
@@ -109,12 +113,12 @@ export const updateMemberById = async (req, res) => {
       return res.status(404).json({ message: "Member not found" });
     }
 
-    const { isValid, error } = validateMember(req.body);
+    const { isValid, validationError } = validateMember(req.body);
     if (!isValid) {
       return res.status(400).json({ message: error });
     }
 
-    const { isSuccessful, imageURL, error } = processImage(req.body);
+    const { isSuccessful, imageURL, imageError } = processImage(req.body);
     if (!isSuccessful && error !== "File already exist") {
       return res.status(400).json({ message: error });
     }
@@ -168,7 +172,7 @@ const validateMember = (memberInput) => {
       .required(),
   });
 
-  const { error } = memberValidationSchema.validate(blogPostInput, {
+  const { error } = memberValidationSchema.validate(memberInput, {
     abortEarly: false,
   });
 
@@ -223,23 +227,26 @@ const processImage = (requestBody) => {
   };
 
   const divAcronym = divisionMap[requestBody.division] || "sec";
-
-  const filePath = path.join(
-    process.env.IMAGE_STORAGE_LOCATION,
-    `${nameAcronym}-${divAcronym}.${extension}`
-  );
+  const fileName = `${nameAcronym}-${divAcronym}.${extension}`;
+  const filePath = path.join(process.env.IMAGE_STORAGE_LOCATION, fileName);
 
   try {
     if (fs.existsSync(filePath)) {
-      const existingBuffer = fs.readFileSync(filePath);
+      const existingFileName = path.basename(filePath);
 
-      if (buffer.equals(existingBuffer)) {
-        return { isSuccessful: false, error: "File already exist" };
+      if (fileName === existingFileName) {
+        return {
+          isSuccessful: true,
+          imageURL: fileName,
+        };
       }
     }
     fs.writeFileSync(filePath, buffer);
 
-    return { isSuccessful: true, imageURL: filePath };
+    return {
+      isSuccessful: true,
+      imageURL: fileName,
+    };
   } catch (err) {
     return { isSuccessful: false, error: "Error saving image", detail: err };
   }
