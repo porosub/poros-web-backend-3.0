@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import Joi from "joi";
 import "dotenv/config";
-import { Op } from "@sequelize/core";
+import { Op } from "sequelize";
 import Member from "../models/member.model.js";
 
 export const getAllMembers = async (req, res) => {
