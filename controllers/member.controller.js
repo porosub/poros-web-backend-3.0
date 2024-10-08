@@ -33,9 +33,9 @@ export const getAllMembers = async (req, res) => {
 
     const [bpiMembers, bphMembers, noGroupMembers] = await Promise.all([
       Member.findAll({ where: { group: "bpi" } }),
-      Member.findAll({ where: { group: "bph" } }),
+      Member.findAll({ where: { group: "bph" }, order: [["division"]] }),
       Member.findAndCountAll({
-        where: { group: { [Op.eq]: "-" } },
+        where: { group: { [Op.eq]: "-" }, position: { [Op.eq]: "Member" } },
         order: [["division"], ["name"]],
         offset,
         limit,
