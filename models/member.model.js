@@ -27,9 +27,6 @@ const Member = sequelize.define(
     },
     imageURL: {
       type: DataTypes.STRING,
-      validate: {
-        isUrl: true,
-      },
     },
     createdAt: {
       type: DataTypes.DATE,
