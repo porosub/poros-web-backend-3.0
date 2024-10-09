@@ -124,7 +124,11 @@ export const updateMemberById = async (req, res) => {
     member.position = req.body.position;
     member.division = req.body.division;
     member.group = req.body.group;
-    if (!imageError) {
+    if (!imageError && imageFileName !== null) {
+      const { isSuccessful, error } = deleteImage(member.imageFileName);
+      if (!isSuccessful) {
+        return res.status(500).json({ message: error });
+      }
       member.imageFileName = imageFileName;
     }
 
@@ -164,9 +168,9 @@ const validateMember = (memberInput) => {
       .valid("Back-end", "Front-end", "Cybersecurity")
       .required(),
     group: Joi.string().valid("bpi", "bph", "-").required(),
-    image: Joi.string()
-      .pattern(/^data:image\/[a-zA-Z]+;base64,[A-Za-z0-9+/=]+$/)
-      .required(),
+    image: Joi.string().pattern(
+      /^data:image\/[a-zA-Z]+;base64,[A-Za-z0-9+/=]+$/
+    ),
   });
 
   const { error } = memberValidationSchema.validate(memberInput, {
@@ -184,6 +188,12 @@ const validateMember = (memberInput) => {
 };
 
 const processImage = (requestBody) => {
+  if (!requestBody.image) {
+    return {
+      isSuccessful: true,
+      imageFileName: null,
+    };
+  }
   if (!requestBody.image.startsWith("data:image/")) {
     return { isSuccessful: false, error: "Invalid image format" };
   }
@@ -229,16 +239,6 @@ const processImage = (requestBody) => {
   const filePath = path.join(process.env.IMAGE_STORAGE_LOCATION, fileName);
 
   try {
-    if (fs.existsSync(filePath)) {
-      const existingBuffer = fs.readFileSync(filePath);
-
-      if (buffer.equals(existingBuffer)) {
-        return {
-          isSuccessful: true,
-          imageFileName: fileName,
-        };
-      }
-    }
     fs.writeFileSync(filePath, buffer);
 
     return {
