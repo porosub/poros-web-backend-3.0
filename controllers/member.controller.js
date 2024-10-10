@@ -153,7 +153,7 @@ export const deleteMemberById = async (req, res) => {
     }
 
     await member.destroy();
-    return res.status(204).end();
+    return res.status(204).send();
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: error.message });
