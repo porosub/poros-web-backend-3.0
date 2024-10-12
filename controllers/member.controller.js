@@ -13,9 +13,10 @@ export const getAllMembers = async (req, res) => {
   const categorization = req.query.categorization;
 
   try {
-    if (!categorization || page !== 1) {
-      const name = req.query.name;
-      const whereClause = name ? { name: { [Op.iLike]: `%${name}%` } } : {};
+    const name = req.query.name;
+    const whereClause = name ? { name: { [Op.iLike]: `%${name}%` } } : {};
+
+    if (!categorization) {
       const { count, rows: members } = await Member.findAndCountAll({
         where: whereClause,
         order: ["division", "name"],
@@ -24,29 +25,45 @@ export const getAllMembers = async (req, res) => {
       });
 
       return res.status(200).json({
-        members: members,
-        totalItems: count,
+        members,
         totalPages: Math.ceil(count / limit),
         currentPage: page,
       });
     }
 
-    const [bpiMembers, bphMembers, noGroupMembers] = await Promise.all([
-      Member.findAll({ where: { group: "bpi" } }),
-      Member.findAll({ where: { group: "bph" }, order: [["division"]] }),
-      Member.findAndCountAll({
-        where: { group: { [Op.eq]: "-" }, position: { [Op.eq]: "Member" } },
-        order: [["division"], ["name"]],
+    const fetchMembers = async (group, position = null) => {
+      const where = { group };
+      if (position) where.position = position;
+      return Member.findAll({ where, order: [["division"]] });
+    };
+
+    const fetchNoGroupMembers = async () => {
+      return Member.findAndCountAll({
+        where: { group: "-", position: "Member" },
+        order: [["division"]],
         offset,
         limit,
-      }),
-    ]);
+      });
+    };
+
+    let bpiMembers = null;
+    let bphMembers = null;
+    let noGroupMembers = null;
+
+    if (page === 1) {
+      [bpiMembers, bphMembers, noGroupMembers] = await Promise.all([
+        fetchMembers("bpi"),
+        fetchMembers("bph"),
+        fetchNoGroupMembers(),
+      ]);
+    } else {
+      noGroupMembers = await fetchNoGroupMembers();
+    }
 
     return res.status(200).json({
       bpi: bpiMembers,
       bph: bphMembers,
       members: noGroupMembers.rows,
-      totalItems: noGroupMembers.count,
       totalPages: Math.ceil(noGroupMembers.count / limit),
       currentPage: page,
     });
@@ -70,7 +87,7 @@ export const createMember = async (req, res) => {
       imageFileName,
       error: imageError,
     } = processImage(req.body);
-    if (!isSuccessful && imageError !== "File already exist") {
+    if (!isSuccessful) {
       return res.status(400).json({ message: imageError });
     }
 
@@ -193,9 +210,6 @@ const processImage = (requestBody) => {
       isSuccessful: true,
       imageFileName: null,
     };
-  }
-  if (!requestBody.image.startsWith("data:image/")) {
-    return { isSuccessful: false, error: "Invalid image format" };
   }
 
   const mimeExtensionMap = {
