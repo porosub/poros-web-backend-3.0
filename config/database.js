@@ -1,7 +1,7 @@
 import { Sequelize } from "sequelize";
 import "dotenv/config";
 import fs from "fs"
-import { getSecret } from './secrets';
+import { getSecret } from './secrets.js';
 
 
 const sequelize = new Sequelize(
