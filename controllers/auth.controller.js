@@ -3,13 +3,14 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import Joi from "joi";
 import Admin from "../models/admin.model.js";
+import { getSecret } from '../config/secrets.js';
 
 export const signup = async (req, res) => {
   const { registrationKey: registrationKey, ...adminData } = req.body;
 
   if (
     !registrationKey ||
-    registrationKey !== process.env.REGISTRATION_SECRET_KEY
+    registrationKey !== getSecret("REGISTRATION_SECRET_KEY", "REGISTRATION_SECRET_KEY_FILE")
   ) {
     return res.status(403).json({ message: "Forbidden" });
   }
@@ -67,7 +68,7 @@ export const signin = (req, res) => {
             .json({ message: "Wrong Username or Password" });
         }
 
-        const token = jwt.sign({ id: admin.id }, process.env.AUTH_SECRET_KEY, {
+        const token = jwt.sign({ id: admin.id }, getSecret(AUTH_SECRET_KEY, AUTH_SECRET_KEY_FILE), {
           expiresIn: "1h",
         });
         res.json({ token });
