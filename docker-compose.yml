@@ -1,0 +1,42 @@
+services:
+  api-server:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - APP_PORT=3000
+      - BASE_URL=fd42:e6b7:6683:d566::1 # alamat internal poros lab
+      - CLIENT_ADDRESS=fd42:e6b7:6683:d566:216:3eff:fea2:dcd8 # alamat internal frontend lab
+      - DATABASE_NAME=porosdb
+      - DATABASE_USERNAME=admin
+      - DATABASE_PASSWORD_FILE=/run/secrets/db_password
+      - DATABASE_HOST=db
+      - IMAGE_STORAGE_LOCATION=/var/cache/images
+      - REGISTRATION_SECRET_KEY_FILE=/run/secrets/registration_key
+      - AUTH_SECRET_KEY_FILE=/run/secrets/auth_key
+    volumes:
+      - image-store:/var/cache/images
+    secrets:
+      - db_password
+  db:
+    image: postgres:12.4
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD_FILE=/run/secrets/db_password
+      - POSTGRES_DB=porosdb
+    ports:
+      - "5432:5432"
+    secrets:
+      - db_password
+  
+
+volumes:
+  image-store:
+
+secrets:
+  db_password:
+    external: true
+  regisration_key:
+    external: true
+  auth_key:
+    external: true
