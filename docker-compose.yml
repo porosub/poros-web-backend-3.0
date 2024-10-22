@@ -19,7 +19,7 @@ services:
     secrets:
       - db_password
       - auth_key
-      - regisration_key
+      - registration_key
     depends_on:
       - db
   db:
@@ -40,7 +40,7 @@ volumes:
 secrets:
   db_password:
     external: true
-  regisration_key:
+  registration_key:
     external: true
   auth_key:
     external: true
