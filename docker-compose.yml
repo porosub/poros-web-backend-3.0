@@ -18,6 +18,8 @@ services:
       - image-store:/var/cache/images
     secrets:
       - db_password
+      - auth_key
+      - regisration_key
     depends_on:
       - db
   db:
