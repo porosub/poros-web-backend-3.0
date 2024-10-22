@@ -68,7 +68,7 @@ export const signin = (req, res) => {
             .json({ message: "Wrong Username or Password" });
         }
 
-        const token = jwt.sign({ id: admin.id }, getSecret(AUTH_SECRET_KEY, AUTH_SECRET_KEY_FILE), {
+        const token = jwt.sign({ id: admin.id }, getSecret("AUTH_SECRET_KEY", "AUTH_SECRET_KEY_FILE"), {
           expiresIn: "1h",
         });
         res.json({ token });

@@ -7,7 +7,7 @@ passport.use(
   new JwtStrategy(
     {
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: getSecret(AUTH_SECRET_KEY, AUTH_SECRET_KEY_FILE)
+      secretOrKey: getSecret("AUTH_SECRET_KEY", "AUTH_SECRET_KEY_FILE")
     },
     (jwtPayload, done) => {
       Admin.findByPk(jwtPayload.id)

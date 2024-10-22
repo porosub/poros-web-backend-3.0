@@ -7,7 +7,7 @@ import { getSecret } from './secrets.js';
 const sequelize = new Sequelize(
   process.env.DATABASE_NAME,
   process.env.DATABASE_USERNAME,
-  getSecret(DATABASE_PASSWORD, DATABASE_PASSWORD_FILE),
+  getSecret("DATABASE_PASSWORD", "DATABASE_PASSWORD_FILE"),
   {
     host: process.env.DATABASE_HOST,
     dialect: "postgres"
