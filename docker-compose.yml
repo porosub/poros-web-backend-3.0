@@ -18,6 +18,8 @@ services:
       - image-store:/var/cache/images
     secrets:
       - db_password
+    depends_on:
+      - db
   db:
     image: postgres:12.4
     environment:
