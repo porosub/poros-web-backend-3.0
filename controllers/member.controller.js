@@ -129,7 +129,7 @@ export const updateMemberById = async (req, res) => {
 
     const { isValid, validationError } = validateMember(req.body);
     if (!isValid) {
-      return res.status(400).json({ message: error });
+      return res.status(400).json({ message: validationError });
     }
 
     const { isSuccessful, imageFileName, imageError } = processImage(req.body);
