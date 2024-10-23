@@ -1,78 +1,37 @@
-import "dotenv/config";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import Joi from "joi";
 import Admin from "../models/admin.model.js";
-import { getSecret } from '../config/secrets.js';
+import { getSecret } from "../config/secrets.js";
 
 export const signup = async (req, res) => {
-  const { registrationKey: registrationKey, ...adminData } = req.body;
-
-  if (
-    !registrationKey ||
-    registrationKey !== getSecret("REGISTRATION_SECRET_KEY", "REGISTRATION_SECRET_KEY_FILE")
-  ) {
-    return res.status(403).json({ message: "Forbidden" });
+  try {
+    console.log("Signup request received:", req.body);
+    const { username, password } = req.body;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newAdmin = await Admin.create({ username, password: hashedPassword });
+    res.status(201).json({ message: "Admin registered successfully" });
+  } catch (error) {
+    console.error("Error during signup:", error);
+    res.status(500).json({ message: "Error registering admin", error });
   }
-
-  const registerAdminValidationSchema = Joi.object({
-    username: Joi.string().required(),
-    password: Joi.string().required(),
-    role: Joi.string().valid("Writer", "Administrator").required(),
-  });
-
-  const { error } = registerAdminValidationSchema.validate(adminData);
-
-  if (error) {
-    return res.status(400).json({
-      message: error.details.map((detail) => detail.message).join(", "),
-    });
-  }
-
-  const existingAdmin = await Admin.findOne({
-    where: {
-      username: adminData.username,
-    },
-  });
-  if (existingAdmin) {
-    return res.status(409).json({ message: "Admin already exist" });
-  }
-
-  const salt = await bcrypt.genSalt(12);
-  const hashedPassword = await bcrypt.hash(adminData.password, salt);
-
-  await Admin.create({
-    username: adminData.username,
-    password: hashedPassword,
-    role: adminData.role,
-  });
-
-  return res.status(201).json({ message: "Admin registered successfully" });
 };
 
-export const signin = (req, res) => {
-  const { username, password } = req.body;
-  Admin.findOne({ where: { username } })
-    .then((admin) => {
-      if (!admin) {
-        return res.status(400).json({ message: "Wrong Username or Password" });
-      }
-
-      bcrypt.compare(password, admin.password, (err, isMatch) => {
-        if (err) {
-          return res.status(500).json({ message: "Internal server error" });
-        }
-        if (!isMatch) {
-          return res
-            .status(400)
-            .json({ message: "Wrong Username or Password" });
-        }
-
-        const token = jwt.sign({ id: admin.id }, getSecret("AUTH_SECRET_KEY", "AUTH_SECRET_KEY_FILE"), {
-          expiresIn: "1h",
-        });
-        res.json({ token });
-      });
-    })
-    .catch((err) => res.status(500).json({ message: "Internal server error" }));
+export const signin = async (req, res) => {
+  try {
+    console.log("Signin request received:", req.body);
+    const { username, password } = req.body;
+    const admin = await Admin.findOne({ where: { username } });
+    if (!admin || !(await bcrypt.compare(password, admin.password))) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+    const token = jwt.sign(
+      { id: admin.id },
+      getSecret("AUTH_SECRET_KEY", "AUTH_SECRET_KEY_FILE"),
+      { expiresIn: "1h" }
+    );
+    res.status(200).json({ token });
+  } catch (error) {
+    console.error("Error during signin:", error);
+    res.status(500).json({ message: "Error signing in", error });
+  }
 };
