@@ -14,4 +14,9 @@ const sequelize = new Sequelize(
   }
 );
 
+sequelize.authenticate().catch((err) => {
+  console.error("Unable to connect to the database:", err);
+  process.exit(1);
+});
+
 export default sequelize;
