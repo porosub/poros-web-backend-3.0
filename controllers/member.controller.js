@@ -25,51 +25,72 @@ export const getAllMembers = async (req, res) => {
       });
 
       return res.status(200).json({
-        members,
-        totalPages: Math.ceil(count / limit),
-        currentPage: page,
+        data: members,
+        pagination: {
+          totalPages: Math.ceil(count / limit),
+          currentPage: page,
+        },
+        error: null,
       });
-    }
-
-    const fetchMembers = async (group, position = null) => {
-      const where = { group };
-      if (position) where.position = position;
-      return Member.findAll({ where, order: [["division"]] });
-    };
-
-    const fetchNoGroupMembers = async () => {
-      return Member.findAndCountAll({
-        where: { group: "-", position: "Member" },
-        order: [["division"]],
-        offset,
-        limit,
-      });
-    };
-
-    let bpiMembers = null;
-    let bphMembers = null;
-    let noGroupMembers = null;
-
-    if (page === 1) {
-      [bpiMembers, bphMembers, noGroupMembers] = await Promise.all([
-        fetchMembers("bpi"),
-        fetchMembers("bph"),
-        fetchNoGroupMembers(),
-      ]);
     } else {
-      noGroupMembers = await fetchNoGroupMembers();
-    }
+      const fetchMembers = async (group, position = null) => {
+        const where = { group };
+        if (position) where.position = position;
+        return Member.findAll({ where, order: [["division"]] });
+      };
 
-    return res.status(200).json({
-      bpi: bpiMembers,
-      bph: bphMembers,
-      members: noGroupMembers.rows,
-      totalPages: Math.ceil(noGroupMembers.count / limit),
-      currentPage: page,
-    });
+      const fetchNoGroupMembers = async () => {
+        return Member.findAndCountAll({
+          where: { group: "-", position: "Member" },
+          order: [["division"]],
+          offset,
+          limit,
+        });
+      };
+
+      let bpiMembers = null;
+      let bphMembers = null;
+      let noGroupMembers = null;
+
+      if (page === 1) {
+        [bpiMembers, bphMembers, noGroupMembers] = await Promise.all([
+          fetchMembers("bpi"),
+          fetchMembers("bph"),
+          fetchNoGroupMembers(),
+        ]);
+        return res.status(200).json({
+          data: {
+            bpi: bpiMembers,
+            bph: bphMembers,
+            members: noGroupMembers.rows,
+          },
+          pagination: {
+            totalPages: Math.ceil(noGroupMembers.count / limit),
+            currentPage: page,
+          },
+          error: null,
+        });
+      } else {
+        noGroupMembers = await fetchNoGroupMembers();
+        return res.status(200).json({
+          data: {
+            members: noGroupMembers.rows,
+          },
+          pagination: {
+            totalPages: Math.ceil(noGroupMembers.count / limit),
+            currentPage: page,
+          },
+          error: null,
+        });
+      }
+    }
   } catch (error) {
     console.error("Error fetching members:", error);
-    return res.status(500).json({ message: error.message });
+    return res.status(500).json({
+      data: null,
+      pagination: null,
+      error: error.message,
+    });
   }
 };
 
@@ -77,7 +98,11 @@ export const createMember = async (req, res) => {
   try {
     const { isValid, error: validationError } = validateMember(req.body);
     if (!isValid) {
-      return res.status(400).json({ message: validationError });
+      return res.status(400).json({
+        data: null,
+        pagination: null,
+        error: validationError,
+      });
     }
 
     const { name, position, division, group, image } = req.body;
@@ -88,7 +113,11 @@ export const createMember = async (req, res) => {
       error: imageError,
     } = processImage(req.body);
     if (!isSuccessful) {
-      return res.status(400).json({ message: imageError });
+      return res.status(400).json({
+        data: null,
+        pagination: null,
+        error: imageError,
+      });
     }
 
     const newMember = await Member.create({
@@ -99,10 +128,18 @@ export const createMember = async (req, res) => {
       imageFileName,
     });
 
-    return res.status(201).json(newMember);
+    return res.status(201).json({
+      data: newMember,
+      pagination: null,
+      error: null,
+    });
   } catch (error) {
-    console.error("Error creating member:", error);
-    return res.status(500).json({ message: error.message });
+    console.error(error);
+    return res.status(500).json({
+      data: null,
+      pagination: null,
+      error: error.message,
+    });
   }
 };
 
@@ -110,13 +147,25 @@ export const getMemberById = async (req, res) => {
   try {
     const member = await Member.findByPk(req.params.id);
     if (!member) {
-      return res.status(404).json({ message: "Member not found" });
+      return res.status(404).json({
+        data: null,
+        pagination: null,
+        error: "Member not found",
+      });
     }
 
-    return res.status(200).json(member);
+    return res.status(200).json({
+      data: member,
+      pagination: null,
+      error: null,
+    });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: error.message });
+    return res.status(500).json({
+      data: null,
+      pagination: null,
+      error: error.message,
+    });
   }
 };
 
@@ -124,17 +173,29 @@ export const updateMemberById = async (req, res) => {
   try {
     const member = await Member.findByPk(req.params.id);
     if (!member) {
-      return res.status(404).json({ message: "Member not found" });
+      return res.status(404).json({
+        data: null,
+        pagination: null,
+        error: "Member not found",
+      });
     }
 
     const { isValid, validationError } = validateMember(req.body);
     if (!isValid) {
-      return res.status(400).json({ message: validationError });
+      return res.status(400).json({
+        data: null,
+        pagination: null,
+        error: validationError,
+      });
     }
 
     const { isSuccessful, imageFileName, imageError } = processImage(req.body);
     if (!isSuccessful && error !== "File already exist") {
-      return res.status(400).json({ message: error });
+      return res.status(400).json({
+        data: null,
+        pagination: null,
+        error: imageError,
+      });
     }
 
     member.name = req.body.name;
@@ -144,16 +205,28 @@ export const updateMemberById = async (req, res) => {
     if (!imageError && imageFileName !== null) {
       const { isSuccessful, error } = deleteImage(member.imageFileName);
       if (!isSuccessful) {
-        return res.status(500).json({ message: error });
+        return res.status(500).json({
+          data: null,
+          pagination: null,
+          error: error,
+        });
       }
       member.imageFileName = imageFileName;
     }
 
     await member.save();
-    return res.status(200).json(member);
+    return res.status(200).json({
+      data: member,
+      pagination: null,
+      error: null,
+    });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: error.message });
+    return res.status(500).json({
+      data: null,
+      pagination: null,
+      error: error.message,
+    });
   }
 };
 
@@ -161,19 +234,35 @@ export const deleteMemberById = async (req, res) => {
   try {
     const member = await Member.findByPk(req.params.id);
     if (!member) {
-      return res.status(404).json({ message: "Member not found" });
+      return res.status(404).json({
+        data: null,
+        pagination: null,
+        error: "Member not found",
+      });
     }
 
     const { isSuccessful, error } = deleteImage(member.imageFileName);
     if (!isSuccessful) {
-      return res.status(500).json({ message: error });
+      return res.status(500).json({
+        data: null,
+        pagination: null,
+        error: error,
+      });
     }
 
     await member.destroy();
-    return res.status(204).send();
+    return res.status(200).json({
+      data: member,
+      pagination: null,
+      error: null,
+    });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: error.message });
+    return res.status(500).json({
+      data: null,
+      pagination: null,
+      error: error.message,
+    });
   }
 };
 
