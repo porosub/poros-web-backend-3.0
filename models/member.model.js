@@ -39,7 +39,7 @@ const Member = sequelize.define(
       type: DataTypes.DATE,
       allowNull: false,
       defaultValue: DataTypes.NOW,
-      field: "created_at",
+      field: "updated_at",
     },
   },
   {
