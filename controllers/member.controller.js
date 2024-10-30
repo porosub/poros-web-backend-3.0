@@ -339,7 +339,7 @@ const processImage = (requestBody) => {
 
   const divAcronym = divisionMap[requestBody.division] || "sec";
   const fileName = `${nameAcronym}-${divAcronym}.${extension}`;
-  const filePath = path.join(process.env.IMAGE_STORAGE_LOCATION, fileName);
+  const filePath = path.join(process.env.IMAGE_STORAGE_LOCATION, "members", fileName);
 
   try {
     fs.writeFileSync(filePath, buffer);
