@@ -1,4 +1,5 @@
 import { randomUUID } from "crypto";
+import WorkProgram from "../models/work-program.model.js";
 
 export const createWorkProgram = (req, res) => {};
 
