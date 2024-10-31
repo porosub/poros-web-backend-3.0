@@ -10,6 +10,29 @@ export const updateWorkProgramById = (req, res) => {};
 
 export const deleteWorkProgramById = (req, res) => {};
 
+const validateWorkProgram = (workProgramInput) => {
+  const workProgramValidationSchema = Joi.object({
+    name: Joi.string().required(),
+    description: Joi.string().required(),
+    image: Joi.string().pattern(
+      /^data:image\/[a-zA-Z]+;base64,[A-Za-z0-9+/=]+$/
+    ),
+  });
+
+  const { error } = workProgramValidationSchema.validate(workProgramInput, {
+    abortEarly: false,
+  });
+
+  if (error) {
+    return {
+      isValid: false,
+      error: error.details.map((detail) => detail.message).join(", "),
+    };
+  } else {
+    return { isValid: true, error: null };
+  }
+};
+
 const processImage = (imageString) => {
   if (!imageString) {
     return {
@@ -26,9 +49,7 @@ const processImage = (imageString) => {
     webp: "webp",
   };
 
-  const mimeTypeMatch = imageString.match(
-    /data:image\/([a-zA-Z]+);base64,/
-  );
+  const mimeTypeMatch = imageString.match(/data:image\/([a-zA-Z]+);base64,/);
   if (!mimeTypeMatch) {
     return { isSuccessful: false, error: "Invalid image format" };
   }
