@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import Achievement from "../models/achievement.model.js";
 
 export const createAchievement = (req, res) => {};
@@ -31,5 +32,74 @@ const validateAchievement = (achievementInput) => {
     };
   } else {
     return { isValid: true, error: null };
+  }
+};
+
+const processImage = (imageString) => {
+  if (!imageString) {
+    return {
+      isSuccessful: true,
+      imageFileName: null,
+    };
+  }
+
+  const mimeExtensionMap = {
+    png: "png",
+    jpeg: "jpg",
+    gif: "gif",
+    bmp: "bmp",
+    webp: "webp",
+  };
+
+  const mimeTypeMatch = imageString.match(/data:image\/([a-zA-Z]+);base64,/);
+  if (!mimeTypeMatch) {
+    return { isSuccessful: false, error: "Invalid image format" };
+  }
+
+  const mimeType = mimeTypeMatch[1];
+  const extension = mimeExtensionMap[mimeType];
+
+  const base64Data = imageString.split(",")[1];
+  const buffer = Buffer.from(base64Data, "base64");
+
+  const achievementImageLocation =
+    process.env.IMAGE_STORAGE_LOCATION + "/achievements";
+
+  if (!fs.existsSync(achievementImageLocation)) {
+    fs.mkdirSync(achievementImageLocation);
+  }
+
+  const fileName = `a-${randomUUID()}.${extension}`;
+  const filePath = path.join(achievementImageLocation, fileName);
+
+  try {
+    fs.writeFileSync(filePath, buffer);
+
+    return {
+      isSuccessful: true,
+      imageFileName: fileName,
+    };
+  } catch (err) {
+    return { isSuccessful: false, error: "Error saving image", detail: err };
+  }
+};
+
+const deleteImage = (fileName) => {
+  const achievementImageLocation =
+    process.env.IMAGE_STORAGE_LOCATION + "/achievements";
+  const filePath = path.join(achievementImageLocation, fileName);
+  if (fs.existsSync(filePath)) {
+    try {
+      fs.unlinkSync(filePath);
+      return { isSuccessful: true };
+    } catch (err) {
+      return {
+        isSuccessful: false,
+        error: "Error deleting image",
+        detail: err,
+      };
+    }
+  } else {
+    return { isSuccessful: false, error: "File not found" };
   }
 };
