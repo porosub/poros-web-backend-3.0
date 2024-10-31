@@ -81,3 +81,23 @@ const processImage = (imageString) => {
     return { isSuccessful: false, error: "Error saving image", detail: err };
   }
 };
+
+const deleteImage = (fileName) => {
+  const workProgramImageLocation =
+    process.env.IMAGE_STORAGE_LOCATION + "/work-programs";
+  const filePath = path.join(workProgramImageLocation, fileName);
+  if (fs.existsSync(filePath)) {
+    try {
+      fs.unlinkSync(filePath);
+      return { isSuccessful: true };
+    } catch (err) {
+      return {
+        isSuccessful: false,
+        error: "Error deleting image",
+        detail: err,
+      };
+    }
+  } else {
+    return { isSuccessful: false, error: "File not found" };
+  }
+};
