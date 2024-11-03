@@ -322,10 +322,8 @@ const processImage = (requestBody) => {
   const base64Data = requestBody.image.split(",")[1];
   const buffer = Buffer.from(base64Data, "base64");
 
-  const memberImageLocation = process.env.IMAGE_STORAGE_LOCATION + "/members";
-
-  if (!fs.existsSync(memberImageLocation)) {
-    fs.mkdirSync(memberImageLocation);
+  if (!fs.existsSync(process.env.IMAGE_STORAGE_LOCATION)) {
+    fs.mkdirSync(process.env.IMAGE_STORAGE_LOCATION);
   }
 
   const nameAcronym = requestBody.name
@@ -341,7 +339,7 @@ const processImage = (requestBody) => {
 
   const divAcronym = divisionMap[requestBody.division] || "sec";
   const fileName = `${nameAcronym}-${divAcronym}.${extension}`;
-  const filePath = path.join(memberImageLocation, fileName);
+  const filePath = path.join(process.env.IMAGE_STORAGE_LOCATION, fileName);
 
   try {
     fs.writeFileSync(filePath, buffer);

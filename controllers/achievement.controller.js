@@ -62,15 +62,12 @@ const processImage = (imageString) => {
   const base64Data = imageString.split(",")[1];
   const buffer = Buffer.from(base64Data, "base64");
 
-  const achievementImageLocation =
-    process.env.IMAGE_STORAGE_LOCATION + "/achievements";
-
-  if (!fs.existsSync(achievementImageLocation)) {
-    fs.mkdirSync(achievementImageLocation);
+  if (!fs.existsSync(process.env.IMAGE_STORAGE_LOCATION)) {
+    fs.mkdirSync(process.env.IMAGE_STORAGE_LOCATION);
   }
 
   const fileName = `a-${randomUUID()}.${extension}`;
-  const filePath = path.join(achievementImageLocation, fileName);
+  const filePath = path.join(process.env.IMAGE_STORAGE_LOCATION, fileName);
 
   try {
     fs.writeFileSync(filePath, buffer);
@@ -85,9 +82,7 @@ const processImage = (imageString) => {
 };
 
 const deleteImage = (fileName) => {
-  const achievementImageLocation =
-    process.env.IMAGE_STORAGE_LOCATION + "/achievements";
-  const filePath = path.join(achievementImageLocation, fileName);
+  const filePath = path.join(process.env.IMAGE_STORAGE_LOCATION, fileName);
   if (fs.existsSync(filePath)) {
     try {
       fs.unlinkSync(filePath);

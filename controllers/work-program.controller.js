@@ -61,15 +61,12 @@ const processImage = (imageString) => {
   const base64Data = imageString.split(",")[1];
   const buffer = Buffer.from(base64Data, "base64");
 
-  const workProgramImageLocation =
-    process.env.IMAGE_STORAGE_LOCATION + "/work-programs";
-
-  if (!fs.existsSync(workProgramImageLocation)) {
-    fs.mkdirSync(workProgramImageLocation);
+  if (!fs.existsSync(process.env.IMAGE_STORAGE_LOCATION)) {
+    fs.mkdirSync(process.env.IMAGE_STORAGE_LOCATION);
   }
 
   const fileName = `wp-${randomUUID()}.${extension}`;
-  const filePath = path.join(workProgramImageLocation, fileName);
+  const filePath = path.join(process.env.IMAGE_STORAGE_LOCATION, fileName);
 
   try {
     fs.writeFileSync(filePath, buffer);
@@ -84,9 +81,7 @@ const processImage = (imageString) => {
 };
 
 const deleteImage = (fileName) => {
-  const workProgramImageLocation =
-    process.env.IMAGE_STORAGE_LOCATION + "/work-programs";
-  const filePath = path.join(workProgramImageLocation, fileName);
+  const filePath = path.join(process.env.IMAGE_STORAGE_LOCATION, fileName);
   if (fs.existsSync(filePath)) {
     try {
       fs.unlinkSync(filePath);
