@@ -1,15 +1,141 @@
 import { randomUUID } from "crypto";
 import Achievement from "../models/achievement.model.js";
 
-export const createAchievement = (req, res) => {};
+export const createAchievement = async (req, res) => {
+  try {
+    const { isValid, error: validationError } = validateAchievement(req.body);
+    if(!isValid){
+      return res.status(400).json({
+        error: validationError,
+      });
+    };
 
-export const getAllAchievements = (req, res) => {};
+    const { title, competitionName, teamName } = req.body;
 
-export const getAchievementById = (req, res) => {};
+    const {isSuccessful, imageFileName, error: imageError} = await processImage(req.body);
+    if(!isSuccessful){
+      return res.status(400).json({
+        error: imageError,
+      })
+    };
 
-export const updateAchievementById = (req, res) => {};
+    const newAchieve = await Achievement.create({
+      title,
+      competitionName,
+      teamName,
+      imageFileName,
+    });
 
-export const deleteAchievementById = (req, res) => {};
+    res.status(201).json({
+      data: newAchieve,
+    });
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({
+      error: error.message,
+    });
+  };
+};
+
+export const getAllAchievements = (req, res) => {
+
+};
+
+export const getAchievementById = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const achievement = await Achievement.findByPk(id);
+    if(!achievement){
+      return res.status(404).json({
+        error: "Achievement not found"
+      });
+    };
+  
+    return res.status(200).json({
+      data: achievement,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      error: error.message,
+    })
+  };
+};
+
+export const updateAchievementById = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const achievement = await Achievement.findByPk(id);
+
+    if(!achievement){
+      return res.status(404).json({
+        error: "Achievement not found",
+      });
+    };
+
+   const { title, competitionName, teamName } = req.body;
+   achievement.title = title;
+   achievement.competitionName = competitionName;
+   achievement.teamName = teamName;
+
+   const {isValid, imageFileName, error: imageError} = await processImage(req.body);
+    if(!isValid && error !== 'File already exist'){
+      return res.status(400).json({
+        error: imageError,
+      });
+    };
+  
+   if(!imageError && imageFileName !== null){
+    const { isValid, error} = deleteImage(achievement.imageFileName);
+    if(!isValid){
+      return res.status(500).json({
+        error: error,
+      });
+    };
+    achievement.imageFileName = imageFileName;
+   };
+
+   await achievement.save();
+   return res.status(201).json({
+    data: achievement,
+   })
+  } catch (error) {
+    console.err(error);
+    return res.status(500).json({
+      error: error.message,
+    });
+  };
+};
+
+export const deleteAchievementById = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const achievement = await Achievement.findByPk(id);
+
+    if(!achievement){
+      return res.status(400).json({
+        error: 'Achievement not found',
+      });
+    };
+
+    const { isValid, error } = deleteImage(achievement.imageFileName);
+    if(!isValid){
+      return res.status(500).json({
+        error: error,
+      });
+    };
+
+    await achievement.destroy();
+    return res.status(200).json({
+      data: achievement,
+    });
+  } catch (error) {
+    console.err(error);
+    return res.status(500).json({
+      error: error.message,
+    });
+  };
+};
 
 const validateAchievement = (achievementInput) => {
   const achievementValidationSchema = Joi.object({
