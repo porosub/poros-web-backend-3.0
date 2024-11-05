@@ -37,9 +37,7 @@ export const createAchievement = async (req, res) => {
   };
 };
 
-export const getAllAchievements = (req, res) => {
-
-};
+export const getAllAchievements = (req, res) => {};
 
 export const getAchievementById = async (req, res) => {
   try {
