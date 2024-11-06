@@ -37,7 +37,33 @@ export const createAchievement = async (req, res) => {
   };
 };
 
-export const getAllAchievements = (req, res) => {};
+export const getAllAchievements = async (req, res) => {
+  const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+  const limit = Math.max(1, parseInt(req.query.limit, 10) || 10);
+  const offset = (page - 1) * limit;
+
+  try {
+    const { count, rows: achievements} = await Achievement.findAndCountAll({
+      limit,
+      offset,
+      order: [['createdAt', 'DESC']],
+    });
+
+    res.status(200).json({
+      data: achievements,
+      pagination : {
+        totalItems: count,
+        totalPages: Math.ceil(count / limit),
+        currentPage: page,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      error: error.message,
+    });
+  };
+};
 
 export const getAchievementById = async (req, res) => {
   try {
@@ -53,7 +79,7 @@ export const getAchievementById = async (req, res) => {
       data: achievement,
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return res.status(500).json({
       error: error.message,
     })
@@ -65,25 +91,32 @@ export const updateAchievementById = async (req, res) => {
     const id = req.params.id;
     const achievement = await Achievement.findByPk(id);
 
-    if(!achievement){
+    if (!achievement) {
       return res.status(404).json({
         error: "Achievement not found",
       });
     };
 
-   const { title, competitionName, teamName } = req.body;
-   achievement.title = title;
-   achievement.competitionName = competitionName;
-   achievement.teamName = teamName;
+    const { isValid, validationError } = validateAchievement(req.body);
+    if (!isValid){
+      return res.status(400).json({
+        error: validationError,
+      })
+    }
 
-   const {isValid, imageFileName, error: imageError} = await processImage(req.body);
-    if(!isValid && error !== 'File already exist'){
+    const { title, competitionName, teamName } = req.body;
+    achievement.title = title;
+    achievement.competitionName = competitionName;
+    achievement.teamName = teamName;
+
+    const {isSuccessful, imageFileName, error: imageError} = await processImage(req.body);
+    if (!isSuccessful && imageError !== 'File already exist') {
       return res.status(400).json({
         error: imageError,
       });
     };
   
-   if(!imageError && imageFileName !== null){
+    if(!imageError && imageFileName !== null){
     const { isValid, error} = deleteImage(achievement.imageFileName);
     if(!isValid){
       return res.status(500).json({
@@ -91,14 +124,14 @@ export const updateAchievementById = async (req, res) => {
       });
     };
     achievement.imageFileName = imageFileName;
-   };
+    };
 
    await achievement.save();
    return res.status(201).json({
     data: achievement,
    })
   } catch (error) {
-    console.err(error);
+    console.error(error);
     return res.status(500).json({
       error: error.message,
     });
@@ -116,8 +149,8 @@ export const deleteAchievementById = async (req, res) => {
       });
     };
 
-    const { isValid, error } = deleteImage(achievement.imageFileName);
-    if(!isValid){
+    const { isSuccessful, error } = deleteImage(achievement.imageFileName);
+    if(!isSuccessful){
       return res.status(500).json({
         error: error,
       });
