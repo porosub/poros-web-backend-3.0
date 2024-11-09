@@ -40,7 +40,7 @@ const BlogPost = sequelize.define(
   }
 );
 
-BlogPost.sync({ force: true })
+BlogPost.sync({})
   .then(() => {})
   .catch((error) => {
     console.error("Failed to sync BlogPost model:", error);

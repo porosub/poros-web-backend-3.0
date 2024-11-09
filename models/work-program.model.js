@@ -39,7 +39,7 @@ const WorkProgram = sequelize.define(
   }
 );
 
-WorkProgram.sync({ force: true })
+WorkProgram.sync({})
   .then(() => {})
   .catch((error) => {
     console.error("Failed to sync WorkProgram model:", error);

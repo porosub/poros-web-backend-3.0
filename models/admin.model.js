@@ -40,7 +40,7 @@ const Admin = sequelize.define(
   }
 );
 
-Admin.sync({ force: true })
+Admin.sync({})
   .then(() => {})
   .catch((error) => {
     console.error("Failed to sync Admin model:", error);
