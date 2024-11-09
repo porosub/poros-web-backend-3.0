@@ -1,40 +1,49 @@
+import fs from "fs";
+import path from "path";
+import Joi from "joi";
 import { randomUUID } from "crypto";
 import Achievement from "../models/achievement.model.js";
 
 export const createAchievement = async (req, res) => {
   try {
     const { isValid, error: validationError } = validateAchievement(req.body);
-    if(!isValid){
+    if (!isValid) {
       return res.status(400).json({
         error: validationError,
       });
-    };
+    }
 
-    const { title, competitionName, teamName } = req.body;
+    const { title, competitionName, teamName, image } = req.body;
 
-    const {isSuccessful, imageFileName, error: imageError} = await processImage(req.body);
-    if(!isSuccessful){
+    const {
+      isSuccessful,
+      imageFileName,
+      error: imageError,
+    } = processImage(image);
+    if (!isSuccessful) {
       return res.status(400).json({
         error: imageError,
-      })
-    };
+      });
+    }
 
-    const newAchieve = await Achievement.create({
+    console.log("test");
+
+    const newAchievement = await Achievement.create({
       title,
       competitionName,
       teamName,
       imageFileName,
     });
 
-    res.status(201).json({
-      data: newAchieve,
+    return res.status(201).json({
+      data: newAchievement,
     });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return res.status(500).json({
       error: error.message,
     });
-  };
+  }
 };
 
 export const getAllAchievements = async (req, res) => {
@@ -43,16 +52,15 @@ export const getAllAchievements = async (req, res) => {
   const offset = (page - 1) * limit;
 
   try {
-    const { count, rows: achievements} = await Achievement.findAndCountAll({
+    const { count, rows: achievements } = await Achievement.findAndCountAll({
       limit,
       offset,
-      order: [['createdAt', 'DESC']],
+      order: [["createdAt", "DESC"]],
     });
 
     res.status(200).json({
       data: achievements,
-      pagination : {
-        totalItems: count,
+      pagination: {
         totalPages: Math.ceil(count / limit),
         currentPage: page,
       },
@@ -62,19 +70,19 @@ export const getAllAchievements = async (req, res) => {
     return res.status(500).json({
       error: error.message,
     });
-  };
+  }
 };
 
 export const getAchievementById = async (req, res) => {
   try {
     const id = req.params.id;
     const achievement = await Achievement.findByPk(id);
-    if(!achievement){
+    if (!achievement) {
       return res.status(404).json({
-        error: "Achievement not found"
+        error: "Achievement not found",
       });
-    };
-  
+    }
+
     return res.status(200).json({
       data: achievement,
     });
@@ -82,8 +90,8 @@ export const getAchievementById = async (req, res) => {
     console.error(error);
     return res.status(500).json({
       error: error.message,
-    })
-  };
+    });
+  }
 };
 
 export const updateAchievementById = async (req, res) => {
@@ -95,47 +103,53 @@ export const updateAchievementById = async (req, res) => {
       return res.status(404).json({
         error: "Achievement not found",
       });
-    };
-
-    const { isValid, validationError } = validateAchievement(req.body);
-    if (!isValid){
-      return res.status(400).json({
-        error: validationError,
-      })
     }
 
-    const { title, competitionName, teamName } = req.body;
+    const { isValid, validationError } = validateAchievement(req.body);
+    if (!isValid) {
+      return res.status(400).json({
+        error: validationError,
+      });
+    }
+
+    const { title, competitionName, teamName, image } = req.body;
     achievement.title = title;
     achievement.competitionName = competitionName;
     achievement.teamName = teamName;
 
-    const {isSuccessful, imageFileName, error: imageError} = await processImage(req.body);
-    if (!isSuccessful && imageError !== 'File already exist') {
+    const {
+      isSuccessful,
+      imageFileName,
+      error: imageError,
+    } = processImage(image);
+    if (!isSuccessful && imageError !== "File already exist") {
       return res.status(400).json({
         error: imageError,
       });
-    };
-  
-    if(!imageError && imageFileName !== null){
-    const { isValid, error} = deleteImage(achievement.imageFileName);
-    if(!isValid){
-      return res.status(500).json({
-        error: error,
-      });
-    };
-    achievement.imageFileName = imageFileName;
-    };
+    }
 
-   await achievement.save();
-   return res.status(201).json({
-    data: achievement,
-   })
+    if (!imageError && imageFileName !== null) {
+      const { isSuccessful, error } = deleteImage(achievement.imageFileName);
+      if (!isSuccessful) {
+        console.error("Error deleting image:", error);
+        return res.status(500).json({
+          error: error,
+        });
+      }
+      achievement.imageFileName = imageFileName;
+    }
+
+    await achievement.save();
+    console.log("Achievement updated successfully:", achievement);
+    return res.status(201).json({
+      data: achievement,
+    });
   } catch (error) {
-    console.error(error);
+    console.error("Error updating achievement:", error);
     return res.status(500).json({
       error: error.message,
     });
-  };
+  }
 };
 
 export const deleteAchievementById = async (req, res) => {
@@ -143,18 +157,18 @@ export const deleteAchievementById = async (req, res) => {
     const id = req.params.id;
     const achievement = await Achievement.findByPk(id);
 
-    if(!achievement){
+    if (!achievement) {
       return res.status(400).json({
-        error: 'Achievement not found',
+        error: "Achievement not found",
       });
-    };
+    }
 
     const { isSuccessful, error } = deleteImage(achievement.imageFileName);
-    if(!isSuccessful){
+    if (!isSuccessful) {
       return res.status(500).json({
         error: error,
       });
-    };
+    }
 
     await achievement.destroy();
     return res.status(200).json({
@@ -165,7 +179,7 @@ export const deleteAchievementById = async (req, res) => {
     return res.status(500).json({
       error: error.message,
     });
-  };
+  }
 };
 
 const validateAchievement = (achievementInput) => {
@@ -234,12 +248,14 @@ const processImage = (imageString) => {
       imageFileName: fileName,
     };
   } catch (err) {
-    return { isSuccessful: false, error: "Error saving image", detail: err };
+    console.error(err);
+    return { isSuccessful: false, error: "Error saving image" };
   }
 };
 
 const deleteImage = (fileName) => {
   const filePath = path.join(process.env.IMAGE_STORAGE_LOCATION, fileName);
+
   if (fs.existsSync(filePath)) {
     try {
       fs.unlinkSync(filePath);
@@ -248,7 +264,6 @@ const deleteImage = (fileName) => {
       return {
         isSuccessful: false,
         error: "Error deleting image",
-        detail: err,
       };
     }
   } else {
