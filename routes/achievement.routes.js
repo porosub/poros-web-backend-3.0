@@ -1,3 +1,5 @@
+import { Router } from "express";
+import jwtAuthMiddleware from '../middlewares/jwt-auth.middleware.js';
 import {
   createAchievement,
   getAllAchievements,
