@@ -46,7 +46,7 @@ const Achievement = sequelize.define(
   }
 );
 
-Achievement.sync()
+Achievement.sync({ force: true })
   .then(() => {})
   .catch((error) => {
     console.error("Failed to sync Achievement model:", error);

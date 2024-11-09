@@ -48,7 +48,7 @@ const Member = sequelize.define(
   }
 );
 
-Member.sync()
+Member.sync({ force: true })
   .then(() => {})
   .catch((error) => {
     console.error("Failed to sync Member model:", error);
