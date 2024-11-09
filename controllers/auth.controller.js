@@ -50,6 +50,7 @@ export const signup = async (req, res) => {
 
     return res.status(201).json({ message: "Admin registered successfully" });
   } catch (err) {
+    console.error(err);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -81,6 +82,7 @@ export const signin = (req, res) => {
       })
       .catch((err) => res.status(500).json({ message: "Internal server error" }));
   } catch (err) {
+    console.error(err);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
