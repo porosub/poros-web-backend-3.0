@@ -310,7 +310,8 @@ const processImage = (requestBody) => {
       imageFileName: fileName,
     };
   } catch (err) {
-    return { isSuccessful: false, error: "Error saving image", detail: err };
+    console.error(err);
+    return { isSuccessful: false, error: "Error saving image" };
   }
 };
 
@@ -321,10 +322,10 @@ const deleteImage = (fileName) => {
       fs.unlinkSync(filePath);
       return { isSuccessful: true };
     } catch (err) {
+      console.error(err);
       return {
         isSuccessful: false,
         error: "Error deleting image",
-        detail: err,
       };
     }
   } else {
