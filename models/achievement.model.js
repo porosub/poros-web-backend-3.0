@@ -2,6 +2,7 @@ import { DataTypes } from "sequelize";
 import sequelize from "../config/database.js";
 
 const Achievement = sequelize.define(
+  "Achievement",
   {
     id: {
       type: DataTypes.INTEGER,
