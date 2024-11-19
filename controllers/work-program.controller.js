@@ -1,7 +1,44 @@
 import { randomUUID } from "crypto";
 import WorkProgram from "../models/work-program.model.js";
 
-export const createWorkProgram = (req, res) => {};
+export const createWorkProgram = async (req, res) => {
+  try {
+    const { isValid, error: validationError } = validateWorkProgram(req.body);
+    if (!isValid) {
+      return res.status(400).json({
+        error: validationError,
+      });
+    }
+
+    const { name, description, image } = req.body;
+
+    const {
+      isSuccessful,
+      imageFileName,
+      error: imageError,
+    } = processImage(image);
+    if (!isSuccessful) {
+      return res.status(400).json({
+        error: imageError,
+      });
+    }
+
+    const newWorkProgram = await WorkProgram.create({
+      name,
+      description,
+      imageFileName,
+    });
+
+    return res.status(201).json({
+      data: newWorkProgram,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      error: error.message,
+    });
+  }
+};
 
 export const getAllWorkPrograms = (req, res) => {};
 
