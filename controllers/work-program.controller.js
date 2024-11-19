@@ -40,7 +40,32 @@ export const createWorkProgram = async (req, res) => {
   }
 };
 
-export const getAllWorkPrograms = (req, res) => {};
+export const getAllWorkPrograms = async (req, res) => {
+  const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+  const limit = Math.max(1, parseInt(req.query.limit, 10) || 10);
+  const offset = (page - 1) * limit;
+
+  try {
+    const { count, rows: workPrograms } = await WorkProgram.findAndCountAll({
+      limit,
+      offset,
+      order: [["createdAt", "DESC"]],
+    });
+
+    res.status(200).json({
+      data: workPrograms,
+      pagination: {
+        totalPages: Math.ceil(count / limit),
+        currentPage: page,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      error: error.message,
+    });
+  }
+};
 
 export const getWorkProgramById = (req, res) => {};
 
