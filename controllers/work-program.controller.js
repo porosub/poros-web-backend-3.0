@@ -88,7 +88,62 @@ export const getWorkProgramById = async (req, res) => {
   }
 };
 
-export const updateWorkProgramById = (req, res) => {};
+export const updateWorkProgramById = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const workProgram = await WorkProgram.findByPk(id);
+
+    if (!workProgram) {
+      return res.status(404).json({
+        error: "WorkProgram not found",
+      });
+    }
+
+    const { isValid, validationError } = validateWorkProgram(req.body);
+    if (!isValid) {
+      return res.status(400).json({
+        error: validationError,
+      });
+    }
+
+    const { name, description, image } = req.body;
+    workProgram.name = name;
+    workProgram.description = description;
+
+    const {
+      isSuccessful,
+      imageFileName,
+      error: imageError,
+    } = processImage(image);
+    if (!isSuccessful && imageError !== "File already exist") {
+      return res.status(400).json({
+        error: imageError,
+      });
+    }
+
+    if (!imageError && imageFileName !== null) {
+      const { isSuccessful, error } = deleteImage(workProgram.imageFileName);
+      if (!isSuccessful) {
+        console.error("Error deleting image:", error);
+        return res.status(500).json({
+          error: error,
+        });
+      }
+      workProgram.imageFileName = imageFileName;
+    }
+
+    await workProgram.save();
+    console.log("WorkProgram updated successfully:", workProgram);
+    return res.status(201).json({
+      data: workProgram,
+    });
+  } catch (error) {
+    console.error("Error updating WorkProgram:", error);
+    return res.status(500).json({
+      error: error.message,
+    });
+  }
+};
 
 export const deleteWorkProgramById = (req, res) => {};
 
