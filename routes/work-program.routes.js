@@ -7,3 +7,13 @@ import {
   updateWorkProgramById,
   deleteWorkProgramById,
 } from "../controllers/work-program.controller.js";
+
+const workProgramRouter = Router();
+
+workProgramRouter.get("/", getAllWorkPrograms);
+workProgramRouter.post("/", jwtAuthMiddleware, createWorkProgram);
+workProgramRouter.get("/:id", jwtAuthMiddleware, getWorkProgramById);
+workProgramRouter.put("/:id", jwtAuthMiddleware, updateWorkProgramById);
+workProgramRouter.delete("/:id", jwtAuthMiddleware, deleteWorkProgramById);
+
+export default workProgramRouter;
