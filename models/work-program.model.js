@@ -2,6 +2,7 @@ import { DataTypes } from "sequelize";
 import sequelize from "../config/database.js";
 
 const WorkProgram = sequelize.define(
+  "WorkProgram",
   {
     id: {
       type: DataTypes.INTEGER,
