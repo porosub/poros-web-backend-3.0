@@ -26,8 +26,6 @@ export const createAchievement = async (req, res) => {
       });
     }
 
-    console.log("test");
-
     const newAchievement = await Achievement.create({
       title,
       competitionName,
