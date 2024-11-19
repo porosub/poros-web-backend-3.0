@@ -133,19 +133,46 @@ export const updateWorkProgramById = async (req, res) => {
     }
 
     await workProgram.save();
-    console.log("WorkProgram updated successfully:", workProgram);
     return res.status(201).json({
       data: workProgram,
     });
   } catch (error) {
-    console.error("Error updating WorkProgram:", error);
+    console.error(error);
     return res.status(500).json({
       error: error.message,
     });
   }
 };
 
-export const deleteWorkProgramById = (req, res) => {};
+export const deleteWorkProgramById = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const workProgram = await WorkProgram.findByPk(id);
+
+    if (!workProgram) {
+      return res.status(400).json({
+        error: "Work Program not found",
+      });
+    }
+
+    const { isSuccessful, error } = deleteImage(workProgram.imageFileName);
+    if (!isSuccessful) {
+      return res.status(500).json({
+        error: error,
+      });
+    }
+
+    await workProgram.destroy();
+    return res.status(200).json({
+      data: workProgram,
+    });
+  } catch (error) {
+    console.err(error);
+    return res.status(500).json({
+      error: error.message,
+    });
+  }
+};
 
 const validateWorkProgram = (workProgramInput) => {
   const workProgramValidationSchema = Joi.object({

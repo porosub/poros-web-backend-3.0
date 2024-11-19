@@ -138,12 +138,11 @@ export const updateAchievementById = async (req, res) => {
     }
 
     await achievement.save();
-    console.log("Achievement updated successfully:", achievement);
     return res.status(201).json({
       data: achievement,
     });
   } catch (error) {
-    console.error("Error updating achievement:", error);
+    console.error(error);
     return res.status(500).json({
       error: error.message,
     });
