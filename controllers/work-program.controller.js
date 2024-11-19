@@ -67,7 +67,26 @@ export const getAllWorkPrograms = async (req, res) => {
   }
 };
 
-export const getWorkProgramById = (req, res) => {};
+export const getWorkProgramById = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const workProgram = await WorkProgram.findByPk(id);
+    if (!workProgram) {
+      return res.status(404).json({
+        error: "Work Program not found",
+      });
+    }
+
+    return res.status(200).json({
+      data: workProgram,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      error: error.message,
+    });
+  }
+};
 
 export const updateWorkProgramById = (req, res) => {};
 
