@@ -4,6 +4,12 @@
 
 The `poros-web-backend-3.0` project is a backend service designed to support the POROS web application. It provides RESTful APIs for managing organization members and blog posts, handling authentication, and facilitating communication between the frontend and the database. This project is built using modern web technologies to ensure scalability, security, and performance.
 
+## ToDo (Next Development Iteration) 📝
+
+1. **Integrate Front-End**: Connect the backend with the client front-end for the About Us and Dashboard pages.
+2. **Update Member Divisions**: Modify the member's division structure to align with the current organization setup.
+3. **Enhance Blogpost Functionality**: Add markdown support and integrate it into the blog post features.
+
 ## Tech Stack 🛠️
 - Node.js
 - Express
