@@ -57,3 +57,6 @@ To run this project locally, follow these steps:
   npm run dev
   ```
 
+  ## API Testing using Postman Collection
+
+  The provided Postman collection file `POROS-WEB-BACKEND-3.0.postman_collection.json` contains a set of API requests for testing the backend of the Poros Web application. This collection is organized into several categories, each representing different functionalities of the application such as Authentication, Member, Achievement, and Work Program. 
