@@ -30,7 +30,6 @@ export const getAllMembers = async (req, res) => {
           totalPages: Math.ceil(count / limit),
           currentPage: page,
         },
-        error: null,
       });
     } else {
       const fetchMembers = async (group, position = null) => {
@@ -68,7 +67,6 @@ export const getAllMembers = async (req, res) => {
             totalPages: Math.ceil(noGroupMembers.count / limit),
             currentPage: page,
           },
-          error: null,
         });
       } else {
         noGroupMembers = await fetchNoGroupMembers();
@@ -80,15 +78,12 @@ export const getAllMembers = async (req, res) => {
             totalPages: Math.ceil(noGroupMembers.count / limit),
             currentPage: page,
           },
-          error: null,
         });
       }
     }
   } catch (error) {
     console.error("Error fetching members:", error);
     return res.status(500).json({
-      data: null,
-      pagination: null,
       error: error.message,
     });
   }
@@ -99,8 +94,6 @@ export const createMember = async (req, res) => {
     const { isValid, error: validationError } = validateMember(req.body);
     if (!isValid) {
       return res.status(400).json({
-        data: null,
-        pagination: null,
         error: validationError,
       });
     }
@@ -114,8 +107,6 @@ export const createMember = async (req, res) => {
     } = processImage(req.body);
     if (!isSuccessful) {
       return res.status(400).json({
-        data: null,
-        pagination: null,
         error: imageError,
       });
     }
@@ -130,14 +121,10 @@ export const createMember = async (req, res) => {
 
     return res.status(201).json({
       data: newMember,
-      pagination: null,
-      error: null,
     });
   } catch (error) {
     console.error(error);
     return res.status(500).json({
-      data: null,
-      pagination: null,
       error: error.message,
     });
   }
@@ -148,22 +135,16 @@ export const getMemberById = async (req, res) => {
     const member = await Member.findByPk(req.params.id);
     if (!member) {
       return res.status(404).json({
-        data: null,
-        pagination: null,
         error: "Member not found",
       });
     }
 
     return res.status(200).json({
       data: member,
-      pagination: null,
-      error: null,
     });
   } catch (error) {
     console.error(error);
     return res.status(500).json({
-      data: null,
-      pagination: null,
       error: error.message,
     });
   }
@@ -174,8 +155,6 @@ export const updateMemberById = async (req, res) => {
     const member = await Member.findByPk(req.params.id);
     if (!member) {
       return res.status(404).json({
-        data: null,
-        pagination: null,
         error: "Member not found",
       });
     }
@@ -183,8 +162,6 @@ export const updateMemberById = async (req, res) => {
     const { isValid, validationError } = validateMember(req.body);
     if (!isValid) {
       return res.status(400).json({
-        data: null,
-        pagination: null,
         error: validationError,
       });
     }
@@ -192,8 +169,6 @@ export const updateMemberById = async (req, res) => {
     const { isSuccessful, imageFileName, imageError } = processImage(req.body);
     if (!isSuccessful && error !== "File already exist") {
       return res.status(400).json({
-        data: null,
-        pagination: null,
         error: imageError,
       });
     }
@@ -206,8 +181,6 @@ export const updateMemberById = async (req, res) => {
       const { isSuccessful, error } = deleteImage(member.imageFileName);
       if (!isSuccessful) {
         return res.status(500).json({
-          data: null,
-          pagination: null,
           error: error,
         });
       }
@@ -217,14 +190,10 @@ export const updateMemberById = async (req, res) => {
     await member.save();
     return res.status(200).json({
       data: member,
-      pagination: null,
-      error: null,
     });
   } catch (error) {
     console.error(error);
     return res.status(500).json({
-      data: null,
-      pagination: null,
       error: error.message,
     });
   }
@@ -235,8 +204,6 @@ export const deleteMemberById = async (req, res) => {
     const member = await Member.findByPk(req.params.id);
     if (!member) {
       return res.status(404).json({
-        data: null,
-        pagination: null,
         error: "Member not found",
       });
     }
@@ -244,8 +211,6 @@ export const deleteMemberById = async (req, res) => {
     const { isSuccessful, error } = deleteImage(member.imageFileName);
     if (!isSuccessful) {
       return res.status(500).json({
-        data: null,
-        pagination: null,
         error: error,
       });
     }
@@ -253,14 +218,10 @@ export const deleteMemberById = async (req, res) => {
     await member.destroy();
     return res.status(200).json({
       data: member,
-      pagination: null,
-      error: null,
     });
   } catch (error) {
     console.error(error);
     return res.status(500).json({
-      data: null,
-      pagination: null,
       error: error.message,
     });
   }
@@ -338,7 +299,7 @@ const processImage = (requestBody) => {
   };
 
   const divAcronym = divisionMap[requestBody.division] || "sec";
-  const fileName = `${nameAcronym}-${divAcronym}.${extension}`;
+  const fileName = `${divAcronym}-${nameAcronym}.${extension}`;
   const filePath = path.join(process.env.IMAGE_STORAGE_LOCATION, fileName);
 
   try {
@@ -349,7 +310,8 @@ const processImage = (requestBody) => {
       imageFileName: fileName,
     };
   } catch (err) {
-    return { isSuccessful: false, error: "Error saving image", detail: err };
+    console.error(err);
+    return { isSuccessful: false, error: "Error saving image" };
   }
 };
 
@@ -360,10 +322,10 @@ const deleteImage = (fileName) => {
       fs.unlinkSync(filePath);
       return { isSuccessful: true };
     } catch (err) {
+      console.error(err);
       return {
         isSuccessful: false,
         error: "Error deleting image",
-        detail: err,
       };
     }
   } else {

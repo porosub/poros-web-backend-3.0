@@ -25,20 +25,22 @@ const BlogPost = sequelize.define(
       type: DataTypes.DATE,
       allowNull: false,
       defaultValue: DataTypes.NOW,
+      field: "created_at",
     },
     updatedAt: {
       type: DataTypes.DATE,
       allowNull: false,
       defaultValue: DataTypes.NOW,
+      field: "updated_at",
     },
   },
   {
-    tableName: "blogposts",
+    tableName: "blog_posts",
     timestamps: true,
   }
 );
 
-BlogPost.sync()
+BlogPost.sync({})
   .then(() => {})
   .catch((error) => {
     console.error("Failed to sync BlogPost model:", error);

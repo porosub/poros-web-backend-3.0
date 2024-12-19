@@ -25,11 +25,13 @@ const Admin = sequelize.define(
       type: DataTypes.DATE,
       allowNull: false,
       defaultValue: DataTypes.NOW,
+      field: "created_at",
     },
     updatedAt: {
       type: DataTypes.DATE,
       allowNull: false,
       defaultValue: DataTypes.NOW,
+      field: "updated_at",
     },
   },
   {
@@ -38,7 +40,7 @@ const Admin = sequelize.define(
   }
 );
 
-Admin.sync()
+Admin.sync({})
   .then(() => {})
   .catch((error) => {
     console.error("Failed to sync Admin model:", error);

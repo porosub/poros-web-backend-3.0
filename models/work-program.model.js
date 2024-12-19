@@ -1,8 +1,8 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../config/database.js";
 
-const Member = sequelize.define(
-  "Member",
+const WorkProgram = sequelize.define(
+  "WorkProgram",
   {
     id: {
       type: DataTypes.INTEGER,
@@ -13,16 +13,8 @@ const Member = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    position: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    division: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    group: {
-      type: DataTypes.STRING,
+    description: {
+      type: DataTypes.TEXT,
       allowNull: false,
     },
     imageFileName: {
@@ -43,15 +35,15 @@ const Member = sequelize.define(
     },
   },
   {
-    tableName: "members",
+    tableName: "work_programs",
     timestamps: true,
   }
 );
 
-Member.sync({})
+WorkProgram.sync({})
   .then(() => {})
   .catch((error) => {
-    console.error("Failed to sync Member model:", error);
+    console.error("Failed to sync WorkProgram model:", error);
   });
 
-export default Member;
+export default WorkProgram;

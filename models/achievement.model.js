@@ -1,29 +1,27 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../config/database.js";
 
-const Member = sequelize.define(
-  "Member",
+const Achievement = sequelize.define(
+  "Achievement",
   {
     id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
     },
-    name: {
+    title: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    position: {
+    competitionName: {
       type: DataTypes.STRING,
       allowNull: false,
+      field: "competition_name",
     },
-    division: {
+    teamName: {
       type: DataTypes.STRING,
       allowNull: false,
-    },
-    group: {
-      type: DataTypes.STRING,
-      allowNull: false,
+      field: "team_name",
     },
     imageFileName: {
       type: DataTypes.STRING,
@@ -43,15 +41,15 @@ const Member = sequelize.define(
     },
   },
   {
-    tableName: "members",
+    tableName: "achievements",
     timestamps: true,
   }
 );
 
-Member.sync({})
+Achievement.sync({})
   .then(() => {})
   .catch((error) => {
-    console.error("Failed to sync Member model:", error);
+    console.error("Failed to sync Achievement model:", error);
   });
 
-export default Member;
+export default Achievement;
